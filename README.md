@@ -1,11 +1,11 @@
 # ETC5521 Assignment 1 
 
-Team name: [FILL]
+Team name: numbat
 
 Team members:
 
-* [FILL]
-* [FILL]
+* Aarathy Babu
+* Lachlan Thomas Moody
 
 # Steps
 
