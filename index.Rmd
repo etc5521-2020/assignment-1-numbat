@@ -12,12 +12,67 @@ output:
 
 [This assignment is for ETC5521 Assignment 1 by Team `r rmarkdown::metadata$team` comprising of `r knitr::combine_words(rmarkdown::metadata$author)`.]{style="color:#006DAE;"}
 
+```{r setup, include = FALSE}
+library(tidyverse)
+library(visdat)
+library(naniar)
+
+knitr::opts_chunk$set(echo = FALSE, message = FALSE)
+```
+
 
 # Introduction and motivation
 
 [FILL] Give the bigger picture of the data, and inspire the reader to learn more about the problem by reading your analysis. 
 
 # Data description
+```{r}
+passwords <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-01-14/passwords.csv')
+
+```
+
+Based upon the motivations discussed above, the following research questions were formulated. The primary subject of interest was:
+
+> What type of passwords do most people use? 
+
+Once this exploration area was established, three questions were composed to parameterise the proceeding analysis. They were:
+
+1.	What are the most commonly used passwords?
+2.	How strong are most people’s passwords?
+3.	What are the strongest types of passwords?
+
+In order to address these areas and explore the field in greater depth, data was sourced from the book *Information is Beautiful* (2014). This contained information on 507 passwords derived from online databases *Skullsecurity* and *DigiNinja* collected in 2014. The data was provided in a tidy format and was read into R Studio in a csv format directly from the GitHub repository provided by *Tidy Tuesday* (2020) using the *readr* (2018) package. The data contained the following variables:
+
+- rank: popularity of password
+- password: actual text of the password
+- category: password type category
+- value: time to crack password by online guessing
+- time_unit: unit of time for corresponding value
+- offline_crack_sec: time to crack offline in seconds
+- rank_alt: alternative value for rank (same value as rank in all cases)
+- strength: relative strength of password from 1 to 10
+- font_size: used externally to create graphic for Knowledge is Beautiful (2014)
+
+A visualisation of the data structure can be seen below in Figure 1 using the *visdat* package (2017).
+
+```{r structure, fig.cap = "Initial Data Structure"}
+vis_dat(passwords)
+```
+
+This graphic highlighted two areas that the data needed to be altered. Firstly, the variable category was recoded to a factor variable rather than a character as this was determined to be a categorical variable. Secondly, there appeared to be some missing observations in the dataset. This was examined further in Figure 2, produced using the *naniar* (2020) package, which showed that all these values were evenly distributed across the tail end of the data set.
+```{r missing, fig.cap = "Missing Data Values"}
+vis_miss(passwords)
+```
+
+
+On further investigation there appeared to be 7 blank rows at the end of the dataset. These observations were subsequently removed using *dplyr* (2020) as they may have negatively impacted the proceeding analysis and provided no tangible value. The final resulting data frame had 500 observations of 9 variables.
+
+```{r cleaneddata}
+clean_passwords <- passwords %>%
+  mutate(category = as.factor(category)) %>%
+  filter(!is.na(rank))
+```
+
 
 # Analysis and findings
 
