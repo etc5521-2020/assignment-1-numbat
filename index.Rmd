@@ -28,7 +28,7 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE)
 # Data description
 ```{r}
 passwords <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-01-14/passwords.csv')
-
+ 
 ```
 
 Based upon the motivations discussed above, the following research questions were formulated. The primary subject of interest was:
