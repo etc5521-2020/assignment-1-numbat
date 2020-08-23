@@ -127,4 +127,35 @@ plot_ly(plo, labels = ~meter, values = ~prop, type = 'pie') %>%
          yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
 ```
 
+> What are the strongest types of passwords?
+
+
+```{r}
+
+# Basic violin plot
+ p <- ggplot(strong, aes(x=category, y= strength,fill=category))+
+               
+#geom_point(aes(size=strength,position = "jitter" ))+)) + 
+   #
+ #ggridges::geom_density_ridges(alpha = 0.75) + 
+  geom_violin(scale = "width") + 
+ stat_summary(fun=mean,geom = "point",color="black")+
+  # stat_summary(fun=median,geom = "point",size=1,shape=23,color="darkgreen") +
+ scale_y_continuous(breaks = seq(0, 50, 5)) +
+
+
+ #  scale_fill_viridis(discrete=TRUE) + 
+    scale_fill_pomological()+
+
+
+   theme(legend.position="none")  + 
+   theme(axis.text.x = element_text(angle=90, hjust=1),
+        axis.title.y = element_blank()) + 
+   xlab("Strength")+coord_flip() 
+ggplotly(p)
+
+
+```
+
+
 # References
