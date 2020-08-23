@@ -99,4 +99,19 @@ clean_passwords <- passwords %>%
 
 ```
 
+
+```{r}
+library(tidyverse)
+ plo <- strong %>% 
+ group_by(meter) %>%
+  count(meter) %>%
+  mutate(prop = n/ nrow(strong) *100) 
+ 
+
+plot_ly(plo, labels = ~meter, values = ~prop, type = 'pie') %>% 
+  layout(title = 'How strong are most passwords?',
+         xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+         yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+```
+
 # References
