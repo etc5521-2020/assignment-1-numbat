@@ -17,7 +17,7 @@ library(tidyverse)
 library(visdat)
 library(naniar)
 
-knitr::opts_chunk$set(echo = FALSE, message = FALSE)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, fig.align = 'center')
 ```
 
 
@@ -92,8 +92,22 @@ view_passwords <- clean_passwords %>%
 
 datatable(view_passwords, rownames = FALSE, caption = "Top 500 Most Popular Passwords", class = "cell-border stripe")
 ```
+```{r wordcloud, fig.cap = "50 most popular passwords"}
+library(wordcloud)
+ranked_passwords <- clean_passwords %>%
+  filter(rank <=50) %>%
+  arrange(-rank) %>%
+  mutate(freq = row_number())
 
-```{r category, message = FALSE}
+set.seed(27)
+
+wordcloud(words = ranked_passwords$password,
+          freq = ranked_passwords$freq,
+          scale = c(3,.2),
+          colors = brewer.pal(8, "Accent")[factor(ranked_passwords$category)])
+```
+
+```{r category, message = FALSE, fig.cap = "Most popular password categories"}
 library(ggthemes)
 library(plotly)
 
@@ -126,12 +140,16 @@ font <- list(family = "Arial",
 
 label <- list(bordercolor = "transparent", 
               font = font)
-  
-ggplotly(plot_category) %>%
-    style(hoverlabel = label)
+
+interactive <- function(p){
+  ggplotly(p) %>%style(hoverlabel = label) %>%
+  config(displayModeBar = F)
+}
+
+interactive(plot_category)
 ```
 
-```{r length}
+```{r length, fig.cap = "Most popular password lengths"}
 length_passwords <- clean_passwords %>%
   mutate(length = nchar(password))
 
@@ -146,8 +164,39 @@ plot_length <- length_passwords %>%
        fill = "Password Category") +
   ggtitle("Most common password lengths")
 
-ggplotly(plot_length) %>%
-  style(hoverlabel = label)
+interactive(plot_length)
 ```
+
+```{r summary, message = FALSE}
+summary_all <- length_passwords %>%
+  summarise(Minimum = min(length), 
+            Q1 = quantile(length, .25), 
+            Median = median(length),
+            Mean = round(mean(length), digits = 2), 
+            Q3 = round(quantile(length, .75), digits = 0), 
+            Maxium = max(length))
+
+summary_category <- length_passwords %>%
+  group_by(category) %>%
+  summarise(Minimum = min(length), 
+            Q1 = quantile(length, .25), 
+            Median = median(length),
+            Mean = round(mean(length), digits = 2), 
+            Q3 = round(quantile(length, .75), digits = 0), 
+            Maxium = max(length))
+
+summary_combined <- bind_rows(summary_all, 
+                              summary_category) %>%
+  mutate(category = as.character(category)) %>%
+  replace_na(list(category = "Overall"))
+
+summary_combined %>%
+  select("Password Category" = category,
+         Minimum:Maxium) %>%
+  kable(caption = "Summary of password length by group") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "border"))
+```
+
+
 
 # References
