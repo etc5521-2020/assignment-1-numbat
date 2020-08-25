@@ -93,5 +93,61 @@ view_passwords <- clean_passwords %>%
 datatable(view_passwords, rownames = FALSE, caption = "Top 500 Most Popular Passwords", class = "cell-border stripe")
 ```
 
+```{r category, message = FALSE}
+library(ggthemes)
+library(plotly)
+
+category_passwords <- clean_passwords %>%
+  group_by(category) %>%
+  summarise(Count = n()) %>%
+  mutate(Proportion = round(100*Count/sum(Count), 
+                            digits = 0)) %>%
+  mutate(Proportion = paste0(Proportion, 
+                             "%"))
+
+plot_category <- category_passwords %>%
+  mutate(category = fct_reorder(category, 
+                                Count)) %>%
+  ggplot(aes(x = Count, 
+             y = category)) +
+  geom_col(aes(fill = category)) +
+  geom_text(aes(x = Count + 12, 
+                y = category, 
+                label = Proportion)) +
+  theme_bw() +
+  theme(legend.position = "none") +
+  expand_limits(x = 210) +
+  labs(y = "Password Category") +
+  ggtitle("Most popular password categories")
+
+font <- list(family = "Arial",
+  size = 15,
+  color = "white")
+
+label <- list(bordercolor = "transparent", 
+              font = font)
+  
+ggplotly(plot_category) %>%
+    style(hoverlabel = label)
+```
+
+```{r length}
+length_passwords <- clean_passwords %>%
+  mutate(length = nchar(password))
+
+plot_length <- length_passwords %>%
+  mutate(category = fct_rev(fct_infreq(category))) %>%
+  ggplot(aes(x = length, 
+             fill = category)) +
+  geom_bar() +
+  theme_bw() +
+  labs(x = "Password Length",
+       y = "", 
+       fill = "Password Category") +
+  ggtitle("Most common password lengths")
+
+ggplotly(plot_length) %>%
+  style(hoverlabel = label)
+```
 
 # References
