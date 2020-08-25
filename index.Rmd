@@ -37,7 +37,7 @@ Based upon the motivations discussed above, the following research questions wer
 
 Once this exploration area was established, three questions were composed to parameterise the proceeding analysis. They were:
 
-1.	What are the most commonly used passwords?
+1.	What are the common trends among the most commonly used passwords?
 2.	How strong are most people’s passwords?
 3.	What are the strongest types of passwords?
 
@@ -79,33 +79,49 @@ clean_passwords <- passwords %>%
 [FILL] Should include at least one plot or numerical summary for each of your questions, that helps the reader arrive at an answer. You should also write paragraphs describing the methods, summaries and findings. 
 
 ### Question 1
+To address the first research question that was proposed, 'What are the common trends among the most commonly used passwords?' the following analysis was undertaken.  
+
+Firstly, the table below provides a brief overview of the data that has been collected, containing the variables relating to the password used, its rank in the data set, the associated category and its relative strength. Simply looking at this table shows that many of the top ranked passwords in terms of popularity are quite simple in nature, containing ordered number or alphabetical series and simple words such as 'baseball' and 'football'. Surprisingly, the word 'password' itself holds the number one spot on the list. This table was made interactive using the *DT* (2020) package, allowing users to uncover what passwords made the top 500 and to see if even their own password is on the list.
 ```{r dataview}
 library(DT)
 library(kableExtra)
 library(htmltools)
+
 view_passwords <- clean_passwords %>%
   select(Password = password,
          "Popularity Rank" = rank,
-         "Password Category" = category,
-         "Password Strength" = strength)
+         "Password Category" = category, 
+         "Password Strength" = strength)  ## Select the required variables and choose better display names
 
 
-datatable(view_passwords, rownames = FALSE, caption = "Top 500 Most Popular Passwords", class = "cell-border stripe")
+datatable(view_passwords, 
+          rownames = FALSE, 
+          caption = "Top 500 Most Popular Passwords", 
+          class = "cell-border stripe")  ## Display data in an interactive table
 ```
+Following this, a visual representation of the data was required to see if any further patterns could be uncovered that did not present themselves in the above tabular format. A wordcloud was chosen for this purpose due to its ability to quickly convey information about textual data. As these graphics typically are produced using the frequency that a word is used a new variable was required as a proxy for this dataset. To achieve this the data was ordered in inverse rank and then a row-number was assigned such that the password with rank equal to 1 would have an associated row number of 500. The data was then restricted to the top 50 entries and coloured by category. The following plot was produced using the *wordcloud* package (2018). 
+
 ```{r wordcloud, fig.cap = "50 most popular passwords"}
 library(wordcloud)
 ranked_passwords <- clean_passwords %>%
   filter(rank <=50) %>%
   arrange(-rank) %>%
-  mutate(freq = row_number())
+  mutate(freq = row_number()) ## Restrict the list to the top 50 passwords, create a new variable freq which is the inverse of rank
 
 set.seed(27)
 
 wordcloud(words = ranked_passwords$password,
-          freq = ranked_passwords$freq,
+          freq = ranked_passwords$freq,  ## This freq variable is used to have the top ranked passwords appear larger
           scale = c(3,.2),
-          colors = brewer.pal(8, "Accent")[factor(ranked_passwords$category)])
+          colors = brewer.pal(8, "Accent")[factor(ranked_passwords$category)]) ## Words are coloured corresponding to their category
 ```
+
+From the above plot, a trend appears to emerge with many of the top ranked passwords belonging to a small subset of categories as evidenced by the predominance of the brown, purple and blue colour in the wordcloud. This alluded to the possibility that password popularity may be related to password category.  
+
+To explore this relationship more closely, the data was expanded from the previous top 50 restriction to include the entire dataset.  
+
+The data set was broken into 10 groups relating to the 10 provided categories and a tally was then taken of the amount of passwords in each group. These figures were then divided by the total number of passwords to get a proportion of each categories representation in the data. This is plotted in the interactive figure below using *plotly* (2020).
+
 
 ```{r category, message = FALSE, fig.cap = "Most popular password categories"}
 library(ggthemes)
@@ -117,55 +133,80 @@ category_passwords <- clean_passwords %>%
   mutate(Proportion = round(100*Count/sum(Count), 
                             digits = 0)) %>%
   mutate(Proportion = paste0(Proportion, 
-                             "%"))
+                             "%")) ## Grouped counts are calculated for each category and a proportion is calculates and displayed as a percentage
 
 plot_category <- category_passwords %>%
   mutate(category = fct_reorder(category, 
-                                Count)) %>%
+                                Count)) %>% ## Reorder the category factors so they are in descending count order
   ggplot(aes(x = Count, 
              y = category)) +
   geom_col(aes(fill = category)) +
   geom_text(aes(x = Count + 12, 
                 y = category, 
-                label = Proportion)) +
+                label = Proportion)) + ## Plot the categories against the count with the proportion mapped to a text geom for labelling
   theme_bw() +
   theme(legend.position = "none") +
   expand_limits(x = 210) +
   labs(y = "Password Category") +
-  ggtitle("Most popular password categories")
+  ggtitle("Most popular password categories") ## Additional theme options
 
-font <- list(family = "Arial",
+font <- list(family = "Arial", ## Create argument font and label to be included in plotly function 
   size = 15,
   color = "white")
 
 label <- list(bordercolor = "transparent", 
               font = font)
 
-interactive <- function(p){
+interactive <- function(p){ ## Function for creating interactive graphics with some styling options
   ggplotly(p) %>%style(hoverlabel = label) %>%
   config(displayModeBar = F)
 }
 
-interactive(plot_category)
+interactive(plot_category) ## Make the ggplot above interactive using the created function
 ```
+The trend witnessed in the wordcloud appeared to carry over to the entire data set, with 65% of the top 500 passwords recorded belonging to only three of the categories; 'name', 'cool-macho' and 'simple-alphanumeric'. In particular, 'name' dominated the list comprising over a third of the passwords recorded. Additionally, this supports the observation made from the data table that people may prefer simple passwords that are easy to remember. This may indicate an area of vulnerability for most people as their name, an easily identifiable piece of information, may be being used to protect potentially sensitive information.  
+
+Another area of interest in relation to this question was password length. While not originally included as a variable in the data it is easily calculated by counting the number of characters in the 'password' variable.  
+
+Once calculated, a frequency distribution was produced of the resulting variable. To better compare the length distribution across categories, a percent stacked bar chart was also plotted. The columns have been coloured relative to category and are the same across the two plots. This plot was also made interactive using both *plotly* (2020) & *crosstalk* (2020).
 
 ```{r length, fig.cap = "Most popular password lengths"}
+library(crosstalk)
+
 length_passwords <- clean_passwords %>%
-  mutate(length = nchar(password))
+  mutate(length = nchar(password)) ## Create a new variable measuring the length of each password in the list
 
 plot_length <- length_passwords %>%
-  mutate(category = fct_rev(fct_infreq(category))) %>%
+  mutate(category = fct_rev(fct_infreq(category))) %>% ## Reorder the category factors by the inverse of count to match the above plot output
   ggplot(aes(x = length, 
              fill = category)) +
-  geom_bar() +
+  geom_bar() + ## Plot the password length distribution and colour by category
   theme_bw() +
   labs(x = "Password Length",
        y = "", 
        fill = "Password Category") +
-  ggtitle("Most common password lengths")
+  ggtitle("Most common password lengths") ## Additional theme options
 
-interactive(plot_length)
+plot_length2 <- length_passwords %>%
+  mutate(category = fct_rev(fct_infreq(category))) %>%
+  ggplot(aes(x = length, fill = category)) +
+  geom_bar(position = "fill") +
+  theme_bw() +
+  labs(x = "Password Length",
+       y = "", 
+       fill = "Password Category") +
+  theme(legend.position = "none")
+
+bscols(interactive(plot_length),
+       interactive(plot_length2))
 ```
+First concerning the frequency distribution, there is a mostly normal distribution of the data with a slight left skew. There is however, a clear peak in the middle of the data set indicating that a majority of passwords in the data set are 6 characters long or more. This may be due to password requirements on many websites and programs that require a minimum number of characters rather than a personal preference. The longest password recorded, 9 characters, was the only one in its group supporting the previous statements that people may prefer simpler passwords.  
+
+While the first plot does give some indication to the distribution of categories across lengths, the second plot allows for more direct comparisons. First of all, the 'name' category appears to be the most popular across all lengths except among the smallest and largest groups. This is reasonable as it is less common for names to contain few or many characters, whereas 4 digit passwords lend themselves to a birth date or a year. A second area of interest is that the largest password in the data set is of the 'simple-alphanumeric' category. Upon further investigation this was found to be related to the string '123456789'. This is further evidence that most passwords are characteristically simple and easy to remember which is reasonable considering they need to be recalled on a regular basis. Perhaps unreasonably though, this does indicate a potential vulnerability in general password security.  
+
+Examining the in-depth summary table produced using *kableExtra* (2019) below provides some additional insight into the data.  
+
+Passwords overall, on average, are 6.2 characters long evidenced by the slight left skew after 6 observed earlier, with most ranging between 6 and 7. The longest passwords meanwhile, tend to be in the 'nerdy-pop' category while the shortest are considered 'fluffy'. Interestingly, though the largest password recored was type 'alpha-numeric', the category overall is the second smallest when comparing the mean length.
 
 ```{r summary, message = FALSE}
 summary_all <- length_passwords %>%
@@ -174,7 +215,7 @@ summary_all <- length_passwords %>%
             Median = median(length),
             Mean = round(mean(length), digits = 2), 
             Q3 = round(quantile(length, .75), digits = 0), 
-            Maxium = max(length))
+            Maxium = max(length)) ## Calculate a 6 number summary for the password lengths of the overall data set
 
 summary_category <- length_passwords %>%
   group_by(category) %>%
@@ -183,20 +224,20 @@ summary_category <- length_passwords %>%
             Median = median(length),
             Mean = round(mean(length), digits = 2), 
             Q3 = round(quantile(length, .75), digits = 0), 
-            Maxium = max(length))
+            Maxium = max(length)) ## Calculate the same summary for each category in the data set
 
 summary_combined <- bind_rows(summary_all, 
                               summary_category) %>%
   mutate(category = as.character(category)) %>%
-  replace_na(list(category = "Overall"))
+  replace_na(list(category = "Overall")) ## Combine the two summary functions above into one output
 
 summary_combined %>%
   select("Password Category" = category,
          Minimum:Maxium) %>%
   kable(caption = "Summary of password length by group") %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "border"))
+  kable_styling(bootstrap_options = c("striped", "hover", "border")) ## Apply some kable styling options to improve table visuals
 ```
-
+Returning to the research question posed at the beginning, there are several statements that can be made relating to common trends among popular passwords. Firstly, passwords are generally chosen that are simple and easy to remember. Secondly, most passwords are related to a 'name' or can also be 'cool-macho' or 'simple-alphanumeric'. Finally, most passwords tend to be 6 or 7 characters long. All these aspects of commonly used passwords have the potential to impact on overall password security. Thus the following two analyis sections will focus on this topic in greater depth.
 
 
 # References
