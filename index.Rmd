@@ -33,7 +33,7 @@ passwords <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/
 
 Based upon the motivations discussed above, the following research questions were formulated. The primary subject of interest was:
 
-> What type of passwords do most people use? 
+> What are the characteristics of the most common passwords? 
 
 Once this exploration area was established, three questions were composed to parameterise the proceeding analysis. They were:
 
@@ -77,5 +77,21 @@ clean_passwords <- passwords %>%
 # Analysis and findings
 
 [FILL] Should include at least one plot or numerical summary for each of your questions, that helps the reader arrive at an answer. You should also write paragraphs describing the methods, summaries and findings. 
+
+### Question 1
+```{r dataview}
+library(DT)
+library(kableExtra)
+library(htmltools)
+view_passwords <- clean_passwords %>%
+  select(Password = password,
+         "Popularity Rank" = rank,
+         "Password Category" = category,
+         "Password Strength" = strength)
+
+
+datatable(view_passwords, rownames = FALSE, caption = "Top 500 Most Popular Passwords", class = "cell-border stripe")
+```
+
 
 # References
