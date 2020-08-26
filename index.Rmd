@@ -78,37 +78,39 @@ clean_passwords <- passwords %>%
 
 [FILL] Should include at least one plot or numerical summary for each of your questions, that helps the reader arrive at an answer. You should also write paragraphs describing the methods, summaries and findings.
 
-> How strong are most people’s passwords?
 
-```{r,echo=FALSE}
+## How strong are the common passwords?
+
+The strength of these common passwords is an interesting feature to explore as variable *strength* is relative to the passwords in the dataset. Since these are commonly used passwords, their strength is expected to be less and easier to crack. The following analysis has been done to explore the dataset,to determine how strong the passwords are.Through out the analysis , the variable *offline_crack_sec* (the time taken to crack the password by offline guessing) is considered instead of the variable  *value* , which depicts the time taken to crack the password by online guessing as both of these values are proportional to each other and the results remain the same while comparisons between passwords. 
+
+```{r initial,echo=FALSE}
   strong <- clean_passwords%>% 
   filter(!is.na(rank)) %>%
-   mutate(meter = case_when(strength >=0 & strength <4 ~ "weak",
+   mutate(meter = case_when(strength >=0 & strength <4 ~ "weak", #categorising strength 
                                    strength >=4 & strength < 6 ~ "medium",
                                    strength >=6 & strength < 8 ~ "strong",
-                            strength >=8 & strength <=10 ~ "very strong",
-                             strength >10 ~ "takes time to crack"),
-          meter=as.factor(meter)) %>% 
-  mutate( online_crack_sec = case_when(time_unit == "seconds" ~ value,
-                            time_unit == "minutes" ~ value * 60,
+                                   strength >=8 & strength <=10 ~ "very strong",
+                                   strength >10 ~ "takes time to crack"),
+                                   meter=as.factor(meter)) %>% 
+  mutate(online_crack_sec = case_when(time_unit == "seconds" ~ value, # conversion of online cracking time into seconds. 
+                             time_unit == "minutes" ~ value * 60,
                              time_unit == "hours" ~ value * 60 * 60,
                              time_unit == "days" ~ value * 60 * 60 * 24,
                              time_unit == "weeks" ~ value * 60 * 60 * 24 * 7,
                              time_unit == "months" ~ value * 60 * 60 * 24 * 365/12,
                              time_unit == "years" ~ value * 60 * 60 * 24 * 365))
 
+
+
 ```
 
 ```{r , eval=FALSE}
-
-# If you don't have devtools installed
 install.packages("devtools")
-
 devtools::install_github("gadenbuie/ggpomological")
 ```
 
 
-```{r , warning=FALSE,echo=FALSE,message=FALSE}
+```{r plo, warning=FALSE, echo=FALSE, message=FALSE , fig.cap="43.6 % of the passwords are relatively high in strength"}
 library(ggplot2)
 library(ggpomological) 
 library(tidyverse)
@@ -118,55 +120,57 @@ library(ggridges)
 library(scales)
 library(gganimate)
 library(ggthemes)
-
- plo <- strong %>% 
- group_by(meter) %>%
+library(crosstalk)
+library(bookdown)
+plo <- strong %>%
+  group_by(meter) %>%  #proportion of the strength category 
   count(meter) %>%
-  mutate(prop = n/ nrow(strong) *100) %>%
-   arrange(desc(prop))
+  mutate(prop = n / nrow(strong) * 100) %>%
+  arrange(desc(prop))
  
 
-plot_ly(plo, labels = ~meter, values = ~prop, type = 'pie') %>% 
-  layout(title = 'How strong are most passwords?',
-         xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-         yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+plot <- plot_ly(plo,
+        labels = ~ meter, #pie chart 
+        values = ~ prop,
+        type = 'pie') %>%
+  layout(
+    title = 'How strong are most passwords?',
+    xaxis = list(
+      showgrid = FALSE,
+      zeroline = FALSE,
+      showticklabels = FALSE
+    ),
+    yaxis = list(
+      showgrid = FALSE,
+      zeroline = FALSE,
+      showticklabels = FALSE
+    )
+  )
+plot
 ```
 
+In the above figure, it can be seen that about 43.6% of the commonly used passwords are passwords with strength between 8-10 on scale of 1-10 with 10 being the highest quality among these passwords. 
+
 ```{r rankings}
+
 options(scipen=999)
  ranking <- strong %>% 
   head(10) %>%
 ggplot(aes(y= password, x= offline_crack_sec,color=password))+
   geom_point() +
   
-  geom_text(aes(label= password,size=-rank),nudge_x = 0.18,nudge_y = -0.3)+ xlim(0,2.5)+
+  geom_text(aes(label= password,size=-rank),nudge_x = 0.18,nudge_y = -0.3)+ 
+   xlim(0,2.5)+
   scale_color_gdocs() + theme_bw() +
   theme(legend.position="none")  + 
    theme(axis.title.y = element_blank(),axis.text.y=element_blank(),
         axis.ticks.y=element_blank()) +
   ggtitle("Time to crack the 10 most common passwords")
 ggplotly(ranking)
-```
-
-```{r time}
-
-time <-  strong %>% arrange(desc(offline_crack_sec)) %>% 
-  head(10) %>% 
-  ggplot(aes(y= fct_reorder(password,offline_crack_sec), x= offline_crack_sec,color=password))+
-  geom_point() +
-  
-  geom_text(aes(label= password,size=0.3),nudge_x = 0.8,nudge_y = -0.3)+
-  scale_color_gdocs() + 
-  scale_x_continuous(expand = c(0,2))+ 
- theme_bw() +
-  theme(legend.position="none")  + 
-   theme(axis.title.y = element_blank(),axis.text.y=element_blank(),
-        axis.ticks.y=element_blank()) +
-  ggtitle("Top 10 common passwords that takes time to crack")
-
-ggplotly(time)
 
 ```
+
+
 
 > What are the strongest types of passwords?
 
@@ -233,9 +237,41 @@ theme_bw() +
   ggtitle("")
 ggplotly(time_strength)
 ```
+```{r time}
+
+time <-  strong %>% arrange(desc(offline_crack_sec)) %>% 
+  head(10) %>% 
+  ggplot(aes(y= fct_reorder(password,offline_crack_sec), x= offline_crack_sec,color=password))+
+  geom_point() +
+ theme_bw(base_size = 10)+
+  geom_text(aes(label= password,size=0.3),nudge_x = 0.8,nudge_y = -0.3)+
+  scale_color_gdocs() + 
+  scale_x_continuous(expand = c(0,2))+ 
+ 
+  theme(legend.position="none")  + 
+   theme(axis.title.y = element_blank(),axis.text.y=element_blank(),
+        axis.ticks.y=element_blank()) +
+  ggtitle("Top 10 common passwords that takes time to crack") 
 
 
+strengthgg <- strong %>% arrange(desc(strength)) %>% 
+  head(10) %>% ggplot(aes(y= fct_reorder(password,strength), x= strength,color=password))+
+  geom_point() +
+  theme_bw(base_size = 10)+
+  geom_text(aes(label= password,size=0.3),nudge_x = 0.8,nudge_y = -0.3)+
+  scale_color_gdocs() + 
+  scale_x_continuous(expand = c(0,2))+ 
+ 
+  theme(legend.position="none")  + 
+   theme(axis.title.y = element_blank(),axis.text.y=element_blank(),
+        axis.ticks.y=element_blank()) +
+  ggtitle("Top 10 passwords with high strength") 
 
+bscols(ggplotly(time),
+       ggplotly(strengthgg),widths=8)
+
+
+```
 
 
 # References
