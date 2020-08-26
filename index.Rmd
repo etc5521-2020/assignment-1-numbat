@@ -23,7 +23,12 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, fig.align = 'center')
 
 # Introduction and motivation
 
-[FILL] Give the bigger picture of the data, and inspire the reader to learn more about the problem by reading your analysis. 
+2020 was a bad year for passwords. A recent audit of the 'dark web' reported on by Forbes unveiled that over 15 billion stolen logins were currently circulating online [Winder, 2020](https://www.forbes.com/sites/daveywinder/2020/07/08/new-dark-web-audit-reveals-15-billion-stolen-logins-from-100000-breaches-passwords-hackers-cybercrime/#73a17f4180fb). As stated in the article, for perspective, this represents two sets of account logins for every person on the planet.  
+
+This was the result of more than 100,000 data breaches relating to cybercrime activities, a 300% increase since 2018. So in an age where everybody is leaving an ever growing digital record of their activities from social media to banking, what can the average person do to bolster their security online?  
+
+The following analysis will explore this current issue in depth using a compilation of some of the most commonly used passwords on the web. It should be noted however that the original data was compiled in September of 2014. There is a possibility therefore that the trends and findings discussed below are not entirely applicable to the modern day. To ensure full relevancy a more up to date collection would be required. However, it is reasonable to assume the underlying foundations of password security have not changed all that much in the past few years. Additionally, the strength rating provided is calculated relative to all the other passwords in the data set. As laid out in the provided documentation, as these common passwords are mostly all 'bad', a high strength rating does not necessarily indicate that a password is hard to crack. However, there are additional variables that allow this to be calculated. Detailed information of the data used and the research questions formulated are provided in the following section. 
+
 
 # Data description
 ```{r}
@@ -31,9 +36,9 @@ passwords <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/
 
 ```
 
-Based upon the motivations discussed above, the following research questions were formulated. The primary subject of interest was:
+Based upon the motivations discussed above, the following research questions were formulated. The primary subject of interest being:
 
-> What are the characteristics of the most common passwords? 
+> What are the characteristics of the most common passwords in the interest of security? 
 
 Once this exploration area was established, three questions were composed to parameterise the proceeding analysis. They were:
 
