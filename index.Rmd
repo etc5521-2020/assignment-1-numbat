@@ -17,7 +17,7 @@ library(tidyverse)
 library(visdat)
 library(naniar)
 
-knitr::opts_chunk$set(echo = FALSE, message = FALSE)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, fig.align = 'center')
 ```
 
 
@@ -83,11 +83,11 @@ clean_passwords <- passwords %>%
 ```{r,echo=FALSE}
   strong <- clean_passwords%>% 
   filter(!is.na(rank)) %>%
-   mutate(meter = case_when(strength >=0 & strength <4 ~ "weak(0-4)",
-                                   strength >=4 & strength < 6 ~ "medium(4-6)",
-                                   strength >=6 & strength < 8 ~ "strong(6-8)",
-                            strength >=8 & strength <=10 ~ "very strong(8-10)",
-                             strength >10 ~ "tough to crack(strength>10)"),
+   mutate(meter = case_when(strength >=0 & strength <4 ~ "weak",
+                                   strength >=4 & strength < 6 ~ "medium",
+                                   strength >=6 & strength < 8 ~ "strong",
+                            strength >=8 & strength <=10 ~ "very strong",
+                             strength >10 ~ "takes time to crack"),
           meter=as.factor(meter)) %>% 
   mutate( online_crack_sec = case_when(time_unit == "seconds" ~ value,
                             time_unit == "minutes" ~ value * 60,
@@ -113,6 +113,11 @@ library(ggplot2)
 library(ggpomological) 
 library(tidyverse)
 library(plotly)
+library(ggplot2)
+library(ggridges)
+library(scales)
+library(gganimate)
+library(ggthemes)
 
  plo <- strong %>% 
  group_by(meter) %>%
@@ -127,35 +132,110 @@ plot_ly(plo, labels = ~meter, values = ~prop, type = 'pie') %>%
          yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
 ```
 
+```{r rankings}
+options(scipen=999)
+ ranking <- strong %>% 
+  head(10) %>%
+ggplot(aes(y= password, x= offline_crack_sec,color=password))+
+  geom_point() +
+  
+  geom_text(aes(label= password,size=-rank),nudge_x = 0.18,nudge_y = -0.3)+ xlim(0,2.5)+
+  scale_color_gdocs() + theme_bw() +
+  theme(legend.position="none")  + 
+   theme(axis.title.y = element_blank(),axis.text.y=element_blank(),
+        axis.ticks.y=element_blank()) +
+  ggtitle("Time to crack the 10 most common passwords")
+ggplotly(ranking)
+```
+
+```{r time}
+
+time <-  strong %>% arrange(desc(offline_crack_sec)) %>% 
+  head(10) %>% 
+  ggplot(aes(y= fct_reorder(password,offline_crack_sec), x= offline_crack_sec,color=password))+
+  geom_point() +
+  
+  geom_text(aes(label= password,size=0.3),nudge_x = 0.8,nudge_y = -0.3)+
+  scale_color_gdocs() + 
+  scale_x_continuous(expand = c(0,2))+ 
+ theme_bw() +
+  theme(legend.position="none")  + 
+   theme(axis.title.y = element_blank(),axis.text.y=element_blank(),
+        axis.ticks.y=element_blank()) +
+  ggtitle("Top 10 common passwords that takes time to crack")
+
+ggplotly(time)
+
+```
+
 > What are the strongest types of passwords?
 
 
-```{r}
+```{r, fig.height= 6}
 
-# Basic violin plot
- p <- ggplot(strong, aes(x=category, y= strength,fill=category))+
-               
-#geom_point(aes(size=strength,position = "jitter" ))+)) + 
-   #
- #ggridges::geom_density_ridges(alpha = 0.75) + 
-  geom_violin(scale = "width") + 
- stat_summary(fun=mean,geom = "point",color="black")+
-  # stat_summary(fun=median,geom = "point",size=1,shape=23,color="darkgreen") +
- scale_y_continuous(breaks = seq(0, 50, 5)) +
+ p <- ggplot(strong, aes(y=category, x= strength,fill=category))+
+                
+  
+geom_density_ridges(quantile_lines = TRUE, quantiles=2,alpha = 0.5,scale=0.96)+ 
+  
+  scale_y_discrete(expand = c(0.1, 0.2)) +
+  theme_ridges(grid = FALSE, center = TRUE) +
+    scale_fill_tableau()+
+  
+   
+   geom_text(data = strong %>% group_by(category) %>% summarize(strength = median(strength)) %>% 
+               filter((category !="animal")), 
+             aes(label=round(strength,digits = 1)), position = position_nudge(y=-0.15),check_overlap = TRUE,
+             color = "black")+ 
+   
+   geom_text(data = strong %>% group_by(category) %>% summarize(strength = median(strength)) %>% filter(category=="animal"), aes(label=paste0("median = ",round(strength,digits = 2))), position = position_nudge(y =-0.2), color = "black") +
 
-
- #  scale_fill_viridis(discrete=TRUE) + 
-    scale_fill_pomological()+
-
-
+theme_bw() +
    theme(legend.position="none")  + 
-   theme(axis.text.x = element_text(angle=90, hjust=1),
-        axis.title.y = element_blank()) + 
-   xlab("Strength")+coord_flip() 
-ggplotly(p)
+   theme(axis.title.y = element_blank()) + 
+   xlab("Strength") + ylab("Password Category") +
+   ggtitle("Which category makes a better password?")+
+   theme(plot.title = element_text(hjust = 0.5))
+p
+
 
 
 ```
+
+> How easy is it to crack your password? 
+
+```{r}
+strong %>% 
+  group_by(category) %>%
+  summarise(average_time=mean(offline_crack_sec)) %>% 
+   ggplot(aes(x=category, y= average_time,color=category))+
+  geom_point(alpha = 2, size = 2) +
+  geom_text(aes(label= category),nudge_y = 0.25,check_overlap = TRUE)+
+  scale_color_gdocs() +
+  theme_bw() +
+  theme(legend.position="none")  + 
+   theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+  
+
+```
+
+
+```{r , fig.height=6}
+
+time_strength <- strong %>% 
+  ggplot(aes(x=(strength), y= offline_crack_sec,color=category))+
+  geom_point(alpha = 2, size = 2) +
+  scale_color_viridis_d() +
+theme_bw() +
+   xlab("Relative Strength") +
+  ylab("Time to crack,(s)") +
+  ggtitle("")
+ggplotly(time_strength)
+```
+
+
+
 
 
 # References
