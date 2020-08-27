@@ -17,7 +17,10 @@ library(tidyverse)
 library(visdat)
 library(naniar)
 
-knitr::opts_chunk$set(echo = FALSE, message = FALSE, fig.align = 'center')
+
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, fig.align = 'center',warning=FALSE)
+
+
 ```
 
 
@@ -33,7 +36,7 @@ The following analysis will explore this current issue in depth using a compilat
 # Data description
 ```{r}
 passwords <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-01-14/passwords.csv')
-
+ 
 ```
 
 Based upon the motivations discussed above, the following research questions were formulated. The primary subject of interest being:
@@ -42,9 +45,10 @@ Based upon the motivations discussed above, the following research questions wer
 
 Once this exploration area was established, three questions were composed to parameterise the proceeding analysis. They were:
 
+
 1.	What are the common trends among the most commonly used passwords?
-2.	How strong are most people’s passwords?
-3.	What are the strongest types of passwords?
+2.	How strong are the common passwords?
+3.	Is high strength related to longer password crack time ?
 
 In order to address these areas and explore the field in greater depth, data was sourced from the book *Information is Beautiful* (2014). This contained information on 507 passwords derived from online databases *Skullsecurity* and *DigiNinja* collected in 2014. The data was provided in a tidy format and was read into R Studio in a csv format directly from the GitHub repository provided by *Tidy Tuesday* (2020) using the *readr* (2018) package. The data contained the following variables:
 
@@ -81,9 +85,9 @@ clean_passwords <- passwords %>%
 
 # Analysis and findings
 
-[FILL] Should include at least one plot or numerical summary for each of your questions, that helps the reader arrive at an answer. You should also write paragraphs describing the methods, summaries and findings. 
 
 ### Question 1
+
 To address the first research question that was proposed, 'What are the common trends among the most commonly used passwords?' the following analysis was undertaken.  
 
 Firstly, the table below provides a brief overview of the data that has been collected, containing the variables relating to the password used, its rank in the data set, the associated category and its relative strength. Simply looking at this table shows that many of the top ranked passwords in terms of popularity are quite simple in nature, containing ordered number or alphabetical series and simple words such as 'baseball' and 'football'. Surprisingly, the word 'password' itself holds the number one spot on the list. This table was made interactive using the *DT* (2020) package, allowing users to uncover what passwords made the top 500 and to see if even their own password is on the list.
@@ -245,4 +249,310 @@ summary_combined %>%
 Returning to the research question posed at the beginning, there are several statements that can be made relating to common trends among popular passwords. Firstly, passwords are generally chosen that are simple and easy to remember. Secondly, most passwords are related to a 'name' or can also be 'cool-macho' or 'simple-alphanumeric'. Finally, most passwords tend to be 6 or 7 characters long. All these aspects of commonly used passwords have the potential to impact on overall password security. Thus the following two analyis sections will focus on this topic in greater depth.
 
 
+
+## How strong are the common passwords?
+
+The strength of these common passwords is an interesting feature to explore as variable *strength* is relative to the passwords in the dataset. Since these are commonly used passwords, their strength is expected to be less and easier to crack. The following analysis has been done to explore the dataset,to determine how strong the passwords are.Through out the analysis , the variable *offline_crack_sec* (the time taken to crack the password by offline guessing) is considered instead of the variable  *value* , which depicts the time taken to crack the password by online guessing , as both of these values are proportional to each other and the results remain the same during comparisons between passwords. 
+
+```{r , eval=FALSE}
+install.packages("devtools")
+devtools::install_github("gadenbuie/ggpomological") #r package used for colors in fig 3.3 
+
+```
+
+```{r initial,echo=FALSE}
+
+library(ggpomological) 
+library(tidyverse)
+library(plotly)
+library(ggplot2)
+library(ggridges)
+library(scales)
+library(ggthemes)
+library(crosstalk)
+
+
+  strong <- clean_passwords%>% 
+  filter(!is.na(rank)) %>%
+   mutate(meter = case_when(strength >=0 & strength <4 ~ "very weak", #categorizing strength 
+                                   strength >=4 & strength < 6 ~ "weak",
+                                   strength >=6 & strength < 8 ~ "medium",
+                                   strength >=8 & strength <=10 ~ "strong",
+                                   strength >10 ~ "very strong"),
+                                   meter=as.factor(meter)) %>% 
+  mutate(online_crack_sec = case_when(time_unit == "seconds" ~ value, # conversion of online cracking time into seconds. 
+                             time_unit == "minutes" ~ value * 60,
+                             time_unit == "hours" ~ value * 60 * 60,
+                             time_unit == "days" ~ value * 60 * 60 * 24,
+                             time_unit == "weeks" ~ value * 60 * 60 * 24 * 7,
+                             time_unit == "months" ~ value * 60 * 60 * 24 * 365/12,
+                             time_unit == "years" ~ value * 60 * 60 * 24 * 365))
+
+
+
+```
+
+
+```{r plo, fig.cap= "43.6 % of the passwords are relatively high in strength"}
+
+plo <- strong %>%
+  group_by(meter) %>%  #proportion of the strength category 
+  count(meter) %>%
+  mutate(prop = n / nrow(strong) * 100) %>%
+  arrange(desc(prop))
+ 
+
+plot <- plot_ly(plo,
+        labels = ~ meter, #pie chart 
+        values = ~ prop,
+        type = 'pie') %>%
+  layout(
+    title = 'How strong are the most common passwords?',
+    xaxis = list(
+      showgrid = FALSE,
+      zeroline = FALSE,
+      showticklabels = FALSE
+    ),
+    yaxis = list(
+      showgrid = FALSE,
+      zeroline = FALSE,
+      showticklabels = FALSE
+    )
+  )
+plot
+```
+
+In the figure  \@ref(fig:plo) above , it can be seen that about 43.6 % of the commonly used passwords are passwords with relative strength between 8 and 10 on scale of 1-10 with 10 being the highest quality among these passwords.35.4 % of the passwords fall in the medium category having relative strength between 6 and 8 where as 9.2 % has a weak strength of 4-6.Very Weak category passwords of strength 0-4 constitute around 8.8 % of the passwords given. Around 3 % of the top 500 common passwords are of strength above 10 which is an interesting outlier because it varies greatly from the strength scale limits of 1-10 set in the dataset description.Since these vary greatly from typical password strength, the passwords with strength more than 10 will not be included in the data analysis. 
+
+Another important characteristic to judge a password is to analyze the time taken to crack it. In order to analyze the time taken to crack the popular passwords,the top 10 common passwords are taken into consideration by using *rank* as a variable.As seen in figure \@ref(fig:rankings) , passwords like *1234*,*12345* ,*123456* and *12345678* are so popular as a word that it is very easily cracked taking approximately 0 seconds.Given the argument that popularity of the passwords is the reason that the passwords are predictable and therefore easily cracked,it is also interesting to see that "password" even though being the ranked one in popularity, is among passwords like *football* and *baseball* that takes relatively more time to get cracked. 
+
+```{r rankings, fig.cap= "As expected, 1234 is quick to be cracked"}
+
+
+options(scipen = 999)
+
+# popular passwords against time taken to crack it
+
+ranking <- strong %>% filter(strength<=10) %>%
+  arrange((rank)) %>%
+  head(10) %>%
+  ggplot(aes(y = password, x = offline_crack_sec, color = password)) +
+  geom_point() +
+  
+  geom_text(aes(label = password, size = -rank),
+            nudge_x = 0.18,
+            nudge_y = -0.3) +
+  xlim(0, 2.5) +
+  scale_color_gdocs() + theme_bw() +
+  theme(legend.position = "none")  +
+  theme(
+    axis.title.y = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank()
+  ) + 
+  xlab("Time taken to crack (seconds)")+
+  ggtitle("Time taken to crack the 10 most common passwords")+
+  
+  theme(plot.title = element_text(hjust = 0.5))
+ggplotly(ranking) 
+
+```
+
+The passwords in the dataset belong to 10 different categories like *simple-alphanumeric* ,*animal* etc.To find which types of passwords are the strongest,the analysis focuses on the password strength and the time taken to crack them . In order to see the distribution of the strength of the passwords belonging to each category, a density plot is drawn below as figure \@ref(fig:ridges) using the *ggridges (2020)* package.A median line is drawn so as to compare the strength across the categories.It can be seen from the plot that password types such as *names*,*sport*,*cool-macho* and *nerdy-pop* are much higher in strength than the other categories as 50 % of these passwords have strength higher than 8.  
+
+```{r ridges, fig.height= 6 , fig.cap="Password categories like 'simple-alphanumeric' have low strength compared to other categories"}
+
+# distribution of strength of password types
+
+p <- ggplot(data=(strong%>% filter(strength<=10)),
+            aes(y = category, x = strength, fill = category)) +
+  
+  
+  geom_density_ridges(
+    quantile_lines = TRUE,
+    quantiles = 2,
+    alpha = 0.5,
+    scale = 0.96
+  ) +
+  
+  scale_y_discrete(expand = c(0.1, 0.2)) +
+  theme_ridges(grid = FALSE, center = TRUE) +
+  scale_fill_tableau() +
+  
+  
+  geom_text(
+    data = strong %>%
+      filter(strength<=10)%>%
+      group_by(category) %>% summarize(strength = median(strength)) %>%
+      filter((category != "animal")),
+    aes(label = round(strength, digits = 1)),
+    position = position_nudge(y = -0.15),
+    check_overlap = TRUE,
+    color = "black"
+  ) +
+  
+  geom_text(
+    data = strong %>% 
+      filter(strength<=10)%>%
+      group_by(category) %>% summarize(strength = median(strength)) %>% filter(category ==
+                                                                                                 "animal"),
+    aes(label = paste0("median = ", round(strength, digits = 2))),
+    position = position_nudge(y = -0.2),
+    color = "black"
+  ) +
+  
+  theme_bw() +
+  theme(legend.position = "none")  +
+  theme(axis.title.y = element_blank()) +
+  xlab("Relative Strength") + ylab("Password Category") +
+  ggtitle("Strength of Password Categories") +
+  theme(plot.title = element_text(hjust = 0.5))
+p
+
+
+
+```
+
+For further investigation of evidences to determine which type of passwords are among the strongest, time to crack the passwords are also evaluated.In order to do so the mean of the variable *offline_crack_sec* is plotted against each category in the figure \@ref(fig:average) below. The figure below shows an interesting pattern that shows the category *rebellious-rude* passwords on an average takes the longest time to be hacked even though the median of the strength of its passwords are not as much as password types like *nerdy-pop* and *sport* .Similar pattern is seen in *password-related* type. It can also be seen that types like *fluffy* even though it has high strength , the average time to hack its password is very less.
+
+```{r average, fig.cap = "Password categories like 'simple-alphanumeric','fluffy' and 'food' are few of the weak categories"}
+
+#Mean time against password categories
+
+strong %>% filter(strength <= 10) %>%
+  group_by(category) %>%
+  summarise(average_time = mean(offline_crack_sec)) %>%
+  ggplot(aes(x = category, y = average_time, color = category)) +
+  geom_point(alpha = 2, size = 2) +
+  geom_text(aes(label = category),
+            nudge_y = 0.01,
+            check_overlap = TRUE) +
+  scale_color_gdocs() +
+  theme_bw() +
+  theme(legend.position = "none")  +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+  ggtitle("Mean time to crack the password category") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  xlab("Password Category") +
+  ylab("Mean time")
+  
+
+```
+To answer the question of which password type is the strongest among these passwords, it can be said that *rebellious-rude* ,*cool-macho* type passwords are good contenders. 
+
+## Is high strength related to longer password crack time ?
+
+The interesting pattern seen in the evaluation of password category strength and hacking time as well as seen in figure \@ref(fig:rankings) where the password ,*password* being ranked 1 in popularity and predictability takes comparatively longer time to get hacked, prompts the question,*Is high strength related to longer password crack time ?* To answer this question, the top 20 passwords that take the longest amount of time to get cracked as well as the top 20 passwords with high strength is taken into consideration. Apart from this, The password categories and its hacking time is also evaluated. 
+
+```{r time, fig.cap= "30% of the passwords with high strength has long crack time" }
+# top 20 passwords with borth strength and long crack time
+
+time_table <- strong %>% filter(strength <= 10) %>%
+  arrange(desc(offline_crack_sec)) %>%
+  head(20)
+strength_table <- strong %>% filter(strength <= 10) %>%
+  arrange(desc(strength)) %>%
+  head(20)
+
+strength_time_plot <- strength_table %>%
+  filter(password %in% (time_table$password)) %>%
+  select(rank, password, offline_crack_sec, strength) %>%
+  ggplot(aes(y = password, x = offline_crack_sec, color = strength)) +
+  geom_point() +
+  
+  geom_text(aes(label = password)) +
+  
+  theme_bw() +
+  theme(
+    axis.title.y = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank()
+  ) + xlab("Time taken to crack (seconds)") +
+  ggtitle("Passwords with high relative strength and long crack time") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+strength_time_plot
+
+```
+
+As seen in the Figure \@ref(fig:time) , only 6 out of 20 passwords with high relative strength had long password crack time and figure @\@ref(fig:timestr) shows that there is no relationship between the hacking time and password strength. Therefore,it can be concluded that not all high strength takes longer to be hacked. 
+
+```{r timestr, fig.height=6,fig.cap= "There seems to be no apparent relationship between password strength and hacking time"}
+
+# testing relationship between time and strength
+
+time_strength <- strong %>% filter(strength <= 10) %>%
+  ggplot(aes(
+    x = (strength),
+    y = offline_crack_sec,
+    color = category
+  )) +
+  geom_point(alpha = 2, size = 2) +
+  scale_color_viridis_d() +
+  theme_bw() +
+  xlab("Relative Strength") +
+  ylab("Time to crack,(s)") +
+  ggtitle("Hacking time Vs Relative Strength") +
+  theme(plot.title = element_text(hjust = 0.5))
+ggplotly(time_strength)
+  
+```
+
+# Conclusion 
+
+Through the exploratory data analysis of the dataset on Top 500 commonly used passwords,it was observed that most people tend to choose passwords that can be easily remembered ,therefore a simple password that is related to a name or contains alphanumeric characters and roughly 6-7 characters long is chosen as password. On exploring further it was found that 43.6 % of the commonly used passwords are relatively high in strength and that around 3% of the passwords were of very high strength which varied greatly from typical passwords. Furthermore ,it was observed that among the password categories,types *rebellious-rude* ,*cool-macho* are considered strong and takes relatively more time to get hacked.Another striking discovery made while analyzing the data is that the hacking time and the strength of the passwords in the dataset is not under any strict relationship and that not all passwords with high strength takes long to be cracked and also, not all passwords with low strength are cracked easily as there have been instances of high strength password being hacked quicker than a low strength password. 
+
+It can be concluded that most people choose common passwords that can be easily hacked and that using any of the passwords in the dataset is not recommended. 
+
 # References
+
+
+     [1] Winder, D. (2020). New Dark Web Audit Reveals 15 Billion Stolen Logins From 100,000 Breaches. Retrieved 18 August 2020, from https://www.forbes.com/sites/daveywinder/2020/07/08/new-dark-web-audit-reveals-15-billion-stolen-logins-from-100000-breaches-passwords-hackers-cybercrime/#344d620180fb
+     
+     [2] Mock, T. (2020). rfordatascience/tidytuesday. Retrieved 16 August 2020, from https://github.com/rfordatascience/tidytuesday/tree/master/data/2020/2020-01-14
+     
+     [3] McCandleless, D. (2020). Knowledge is Beautiful, my new book — Information is Beautiful. Retrieved 18 August 2020, from http://www.informationisbeautiful.net/2014/knowledge-is-beautiful/
+     
+     [4] Wood, R. (2020). Pipal, Password Analyser - DigiNinja. Retrieved 18 August 2020, from https://digi.ninja/projects/pipal.php
+     
+     [5] Passwords - SkullSecurity. (2020). Retrieved 20 August 2020, from https://wiki.skullsecurity.org/Passwords
+     
+     [6] Pie Charts. (2020). Retrieved 24 August 2020, from https://plotly.com/r/pie-charts/
+     
+     [7] Elegant Visualization of Density Distribution in R Using Ridgeline - Datanovia. (2020). Retrieved 23 August 2020, from https://www.datanovia.com/en/blog/elegant-visualization-of-density-distribution-in-r-using-ridgeline/
+     
+     [8] Claus O. Wilke (2020). ggridges: Ridgeline Plots in 'ggplot2'. R package version 0.5.2.  https://CRAN.R-project.org/package=ggridges
+     
+     [9] Yihui Xie, Joe Cheng and Xianying Tan (2020). DT: A Wrapper of the JavaScript Library 'DataTables'. R package version 0.15. https://CRAN.R-project.org/package=DT
+     
+     [10] Wickham et al., (2019). Welcome to the tidyverse. Journal of Open Source Software, 4(43), 1686, https://doi.org/10.21105/joss.01686
+     
+     [11] Tierney N (2017). “visdat: Visualising Whole Data Frames.” _JOSS_, *2*(16), 355. doi: 10.21105/joss.00355 (URL: https://doi.org/10.21105/joss.00355), <URL: http://dx.doi.org/10.21105/joss.00355>.
+     
+     [12] Nicholas Tierney, Di Cook, Miles McBain and Colin Fay (2020). naniar: Data Structures, Summaries, and Visualisations for Missing Data. R package version 0.5.2. https://CRAN.R-project.org/package=naniar
+     
+     [13] Hadley Wickham, Jim Hester and Romain Francois (2018). readr: Read Rectangular Text Data. R package version 1.3.1. https://CRAN.R-project.org/package=readr
+     
+     [14] Hao Zhu (2019). kableExtra: Construct Complex Table with 'kable' and Pipe Syntax. R package version 1.1.0. https://CRAN.R-project.org/package=kableExtra
+     
+     [15] Joe Cheng, Carson Sievert, Winston Chang, Yihui Xie and Jeff Allen (2020). htmltools: Tools for HTML. R package version 0.5.0. https://CRAN.R-project.org/package=htmltools
+     
+     [16] Ian Fellows (2018). wordcloud: Word Clouds. R package version 2.6. https://CRAN.R-project.org/package=wordcloud
+     
+     [17] Jeffrey B. Arnold (2019). ggthemes: Extra Themes, Scales and Geoms for 'ggplot2'. R package version 4.2.0. https://CRAN.R-project.org/package=ggthemes
+     
+     [18] C. Sievert. Interactive Web-Based Data Visualization with R, plotly, and shiny. Chapman and Hall/CRC Florida, 2020.
+     
+     [19] Joe Cheng (2020). crosstalk: Inter-Widget Interactivity for HTML Widgets. R package version 1.1.0.1. https://CRAN.R-project.org/package=crosstalk
+     
+     [20] Garrick Aden-Buie (2020). ggpomological: Pomological plot themes for ggplot2. R package version 0.1.2. https://github.com/gadenbuie/ggpomological
+     
+     [21] Hadley Wickham and Dana Seidel (2020). scales: Scale Functions for Visualization. R package version 1.1.1. https://CRAN.R-project.org/package=scales
+     
+     [22] H. Wickham. ggplot2: Elegant Graphics for Data Analysis. Springer-Verlag New York, 2016.
+     
+  
+
+
+
