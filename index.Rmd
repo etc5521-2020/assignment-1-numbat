@@ -38,8 +38,8 @@ Based upon the motivations discussed above, the following research questions wer
 Once this exploration area was established, three questions were composed to parameterise the proceeding analysis. They were:
 
 1.	What are the most commonly used passwords?
-2.	How strong are most people’s passwords?
-3.	What are the strongest types of passwords?
+2.	How strong are the common passwords?
+3.	Is high strength related to longer password crack time ?
 
 In order to address these areas and explore the field in greater depth, data was sourced from the book *Information is Beautiful* (2014). This contained information on 507 passwords derived from online databases *Skullsecurity* and *DigiNinja* collected in 2014. The data was provided in a tidy format and was read into R Studio in a csv format directly from the GitHub repository provided by *Tidy Tuesday* (2020) using the *readr* (2018) package. The data contained the following variables:
 
@@ -136,7 +136,7 @@ plot <- plot_ly(plo,
         values = ~ prop,
         type = 'pie') %>%
   layout(
-    title = 'How strong are most passwords?',
+    title = 'How strong are the most common passwords?',
     xaxis = list(
       showgrid = FALSE,
       zeroline = FALSE,
@@ -182,8 +182,6 @@ ranking <- strong %>% filter(strength<=10) %>%
 ggplotly(ranking) 
 
 ```
-
-##  What are the strongest types of passwords?
 
 The passwords in the dataset belong to different categories like "simple-alphanumeric" ,"animal" etc.To find which types of passwords are the strongest,the analysis focuses on the password strength and the time taken to crack them . In order to see the distribuition of the strength of the passwords belonging to each category, a density plot is drawn below as figure 9 using the *ggridges (2020)* package.A median line is drawn so as to compare the strength across the categories.It can be seen from the plot that password types such as "names","sport","cool-macho" and "nerdy-pop" are much higher in strength than the other categories as 50 % of these passwords have strength higher than 8.  
 
@@ -260,6 +258,8 @@ strong %>% filter(strength<=10) %>%
 ```
 To answer the question of which password type is the strongest among these passwords, it can be said that "rebellious-rude" ,"cool-macho" type passwords are good contenders. 
 
+## Is high strength related to longer password crack time ?
+
 The interesting pattern seen in the evaluation of password category strength and hacking time as well as seen in figure 7 where the password ,"password" being ranked 1 in popularity and predictability takes comparitively longer time to get hacked, prompts the question,*Is high strength related to longer password crack time ?* To answer this question, the top 20 passwords that take the longest amount of time to get cracked as well as the top 20 passwords with high strength is taken into consideration. Apart from this, The password categories and its hacking time is also evaluated. 
 
 ```{r time ,fig.cap="Figure 10 : 30% of the passwords with high strength has long crack time" }
@@ -309,4 +309,12 @@ ggplotly(time_strength)
   
 ```
 
+# Conclusion 
+
+Through the exploratory data analysis of the dataset on Top 500 commonly used passwords,it was observed that most people tend to choose passwords that can be easily remembered ,therefore a simple password that is related to a name or contains alphanumeric characters and roughly 6-7 characters long is chosen as password. On exploring further it was found that 43.6 % of the commonly used passwords are relatively high in strength and that around 3% of the passwords were of very high strength which varied greatly from typical passwords. Furthermore ,it was observed that among the password categories,types "rebellious-rude" ,"cool-macho" are considered strong and takes relatively more time to get hacked.Another striking discovery made while analyzing the data is that the hacking time and the strength of the passwords in the dataset is not under any strict relationship and that not all passwords with high strength takes long to be cracked and also, not all passwords with low strength are cracked easily as there have been instances of high strength password being hacked quicker than a low strength password. 
+
+It can be concluded that most people choose common passwords that can be easily hacked and that using any of the passwords in the dataset is not recommended. 
+
 # References
+
+
