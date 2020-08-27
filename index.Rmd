@@ -35,7 +35,7 @@ library(scales)
 library(ggthemes)
 library(crosstalk)
 library(devtools)
-
+library(crosstalk)
 
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, fig.align = 'center',warning=FALSE)
 
@@ -87,7 +87,7 @@ A visualisation of the data structure can be seen below in Figure 1 using the *v
 vis_dat(passwords)
 ```
 
-This graphic highlighted two areas that the data needed to be altered. Firstly, the variable category was recoded to a factor variable rather than a character as this was determined to be a categorical variable. Secondly, there appeared to be some missing observations in the dataset. This was examined further in Figure 2, produced using the *naniar* (2020) package, which showed that all these values were evenly distributed across the tail end of the data set.
+Figure \@ref(fig:structure) highlighted two areas that the data needed to be altered. Firstly, the variable category was recoded to a factor variable rather than a character as this was determined to be a categorical variable. Secondly, there appeared to be some missing observations in the dataset. This was examined further in Figure \@ref(fig:missing), produced using the *naniar* (2020) package, which showed that all these values were evenly distributed across the tail end of the data set.
 ```{r missing, fig.cap = "Missing Data Values"}
 vis_miss(passwords)
 ```
@@ -109,8 +109,8 @@ clean_passwords <- passwords %>%
 
 To address the first research question that was proposed, 'What are the common trends among the most commonly used passwords?' the following analysis was undertaken.  
 
-Firstly, the table below provides a brief overview of the data that has been collected, containing the variables relating to the password used, its rank in the data set, the associated category and its relative strength. Simply looking at this table shows that many of the top ranked passwords in terms of popularity are quite simple in nature, containing ordered number or alphabetical series and simple words such as 'baseball' and 'football'. Surprisingly, the word 'password' itself holds the number one spot on the list. This table was made interactive using the *DT* (2020) package, allowing users to uncover what passwords made the top 500 and to see if even their own password is on the list.
-```{r dataview}
+Firstly, table \@ref(fig:dataview) below provides a brief overview of the data that has been collected, containing the variables relating to the password used, its rank in the data set, the associated category and its relative strength. Simply looking at this table shows that many of the top ranked passwords in terms of popularity are quite simple in nature, containing ordered number or alphabetical series and simple words such as 'baseball' and 'football'. Surprisingly, the word 'password' itself holds the number one spot on the list. This table was made interactive using the *DT* (2020) package, allowing users to uncover what passwords made the top 500 and to see if even their own password is on the list.
+```{r dataview, fig.cap="Top 500 Most Popular Passwords"}
 view_passwords <- clean_passwords %>%
   select(Password = password,
          "Popularity Rank" = rank,
@@ -123,7 +123,8 @@ datatable(view_passwords,
           caption = "Top 500 Most Popular Passwords", 
           class = "cell-border stripe")  ## Display data in an interactive table
 ```
-Following this, a visual representation of the data was required to see if any further patterns could be uncovered that did not present themselves in the above tabular format. A wordcloud was chosen for this purpose due to its ability to quickly convey information about textual data. As these graphics typically are produced using the frequency that a word is used a new variable was required as a proxy for this dataset. To achieve this the data was ordered in inverse rank and then a row-number was assigned such that the password with rank equal to 1 would have an associated row number of 500. The data was then restricted to the top 50 entries and coloured by category. The following plot was produced using the *wordcloud* package (2018). 
+
+Following this, a visual representation of the data was required to see if any further patterns could be uncovered that did not present themselves in the above tabular format. A wordcloud was chosen for this purpose due to its ability to quickly convey information about textual data. As these graphics typically are produced using the frequency that a word is used a new variable was required as a proxy for this dataset. To achieve this the data was ordered in inverse rank and then a row-number was assigned such that the password with rank equal to 1 would have an associated row number of 500. The data was then restricted to the top 50 entries and coloured by category. The following plot is displayed in Figure \@ref(fig:wordcloud) and was produced using the *wordcloud* package (2018). 
 
 ```{r wordcloud, fig.cap = "50 most popular passwords"}
 ranked_passwords <- clean_passwords %>%
@@ -143,7 +144,7 @@ From the above plot, a trend appears to emerge with many of the top ranked passw
 
 To explore this relationship more closely, the data was expanded from the previous top 50 restriction to include the entire dataset.  
 
-The data set was broken into 10 groups relating to the 10 provided categories and a tally was then taken of the amount of passwords in each group. These figures were then divided by the total number of passwords to get a proportion of each categories representation in the data. This is plotted in the interactive figure below using *plotly* (2020).
+The data set was broken into 10 groups relating to the 10 provided categories and a tally was then taken of the amount of passwords in each group. These figures were then divided by the total number of passwords to get a proportion of each categories representation in the data. This is plotted in the interactive figure \@ref(fig:category) below using *plotly* (2020).
 
 
 ```{r category, message = FALSE, fig.cap = "Most popular password categories"}
@@ -184,6 +185,7 @@ interactive <- function(p){ ## Function for creating interactive graphics with s
 
 interactive(plot_category) ## Make the ggplot above interactive using the created function
 ```
+
 The trend witnessed in the wordcloud appeared to carry over to the entire data set, with 65% of the top 500 passwords recorded belonging to only three of the categories; 'name', 'cool-macho' and 'simple-alphanumeric'. In particular, 'name' dominated the list comprising over a third of the passwords recorded. Additionally, this supports the observation made from the data table that people may prefer simple passwords that are easy to remember. This may indicate an area of vulnerability for most people as their name, an easily identifiable piece of information, may be being used to protect potentially sensitive information.  
 
 Another area of interest in relation to this question was password length. While not originally included as a variable in the data it is easily calculated by counting the number of characters in the 'password' variable.  
@@ -191,8 +193,6 @@ Another area of interest in relation to this question was password length. While
 Once calculated, a frequency distribution was produced of the resulting variable. To better compare the length distribution across categories, a percent stacked bar chart was also plotted. The columns have been coloured relative to category and are the same across the two plots. This plot was also made interactive using both *plotly* (2020) & *crosstalk* (2020).
 
 ```{r length, fig.cap = "Most popular password lengths"}
-library(crosstalk)
-
 length_passwords <- clean_passwords %>%
   mutate(length = nchar(password)) ## Create a new variable measuring the length of each password in the list
 
@@ -224,7 +224,7 @@ First concerning the frequency distribution, there is a mostly normal distributi
 
 While the first plot does give some indication to the distribution of categories across lengths, the second plot allows for more direct comparisons. First of all, the 'name' category appears to be the most popular across all lengths except among the smallest and largest groups. This is reasonable as it is less common for names to contain few or many characters, whereas 4 digit passwords lend themselves to a birth date or a year. A second area of interest is that the largest password in the data set is of the 'simple-alphanumeric' category. Upon further investigation this was found to be related to the string '123456789'. This is further evidence that most passwords are characteristically simple and easy to remember which is reasonable considering they need to be recalled on a regular basis. Perhaps unreasonably though, this does indicate a potential vulnerability in general password security.  
 
-Examining the in-depth summary table produced using *kableExtra* (2019) below provides some additional insight into the data.  
+Examining the in-depth summary table \@ref(tab:summary) produced using *kableExtra* (2019) below provides some additional insight into the data.  
 
 Passwords overall, on average, are 6.2 characters long evidenced by the slight left skew after 6 observed earlier, with most ranging between 6 and 7. The longest passwords meanwhile, tend to be in the 'nerdy-pop' category while the shortest are considered 'fluffy'. Interestingly, though the largest password recored was type 'alpha-numeric', the category overall is the second smallest when comparing the mean length.
 
@@ -263,7 +263,7 @@ Returning to the research question posed at the beginning, there are several sta
 
 ## How strong are the common passwords?
 
-The strength of these common passwords is an interesting feature to explore as variable *strength* is relative to the passwords in the dataset. Since these are commonly used passwords, their strength is expected to be less and easier to crack. The following analysis has been done to explore the dataset,to determine how strong the passwords are.Through out the analysis , the variable *offline_crack_sec* (the time taken to crack the password by offline guessing) is considered instead of the variable  *value* , which depicts the time taken to crack the password by online guessing , as both of these values are proportional to each other and the results remain the same during comparisons between passwords. 
+The strength of these common passwords is an interesting feature to explore as variable *strength* is relative to the passwords in the dataset. Since these are commonly used passwords, their strength is expected to be less and easier to crack. The following analysis has been done to explore the dataset, to determine how strong the passwords are.Through out the analysis, the variable *offline_crack_sec* (the time taken to crack the password by offline guessing) is considered instead of the variable  *value*, which depicts the time taken to crack the password by online guessing, as both of these values are proportional to each other and the results remain the same during comparisons between passwords. 
 
 ```{r initial,echo=FALSE}
 strong <- clean_passwords%>% 
@@ -316,9 +316,9 @@ plot <- plot_ly(plo,
 plot
 ```
 
-In the figure  \@ref(fig:plo) above , it can be seen that about 43.6 % of the commonly used passwords are passwords with relative strength between 8 and 10 on scale of 1-10 with 10 being the highest quality among these passwords.35.4 % of the passwords fall in the medium category having relative strength between 6 and 8 where as 9.2 % has a weak strength of 4-6.Very Weak category passwords of strength 0-4 constitute around 8.8 % of the passwords given. Around 3 % of the top 500 common passwords are of strength above 10 which is an interesting outlier because it varies greatly from the strength scale limits of 1-10 set in the dataset description.Since these vary greatly from typical password strength, the passwords with strength more than 10 will not be included in the data analysis. 
+In figure  \@ref(fig:plo) above, it can be seen that about 43.6% of the commonly used passwords are passwords with relative strength between 8 and 10 on scale of 1-10 with 10 being the highest quality among these passwords. 35.4% of the passwords fall in the medium category having relative strength between 6 and 8 where as 9.2% have a weak strength of 4-6. Very Weak category passwords of strength 0-4 constitute around 8.8% of the passwords given. Around 3% of the top 500 common passwords are of strength above 10 which is an interesting outlier because it varies greatly from the strength scale limits of 1-10 set in the dataset description. Since these vary greatly from typical password strength, the passwords with strength more than 10 will not be included in the data analysis. 
 
-Another important characteristic to judge a password is to analyze the time taken to crack it. In order to analyze the time taken to crack the popular passwords,the top 10 common passwords are taken into consideration by using *rank* as a variable.As seen in figure \@ref(fig:rankings) , passwords like *1234*,*12345* ,*123456* and *12345678* are so popular as a word that it is very easily cracked taking approximately 0 seconds.Given the argument that popularity of the passwords is the reason that the passwords are predictable and therefore easily cracked,it is also interesting to see that "password" even though being the ranked one in popularity, is among passwords like *football* and *baseball* that takes relatively more time to get cracked. 
+Another important characteristic to judge a password is to analyze the time taken to crack it. In order to analyze the time taken to crack the popular passwords, the top 10 common passwords are taken into consideration by using *rank* as a variable. As seen in figure \@ref(fig:rankings), passwords like *1234*, *12345*, *123456* and *12345678* are so popular that it is very easily cracked taking approximately 0 seconds. Given the argument that popularity of the passwords is the reason that the passwords are predictable and therefore easily cracked, it is also interesting to see that "password" even though being the ranked one in popularity, is among passwords like *football* and *baseball* that take relatively more time to be cracked. 
 
 ```{r rankings, fig.cap= "As expected, 1234 is quick to be cracked"}
 
@@ -352,7 +352,7 @@ ggplotly(ranking)
 
 ```
 
-The passwords in the dataset belong to 10 different categories like *simple-alphanumeric* ,*animal* etc.To find which types of passwords are the strongest,the analysis focuses on the password strength and the time taken to crack them . In order to see the distribution of the strength of the passwords belonging to each category, a density plot is drawn below as figure \@ref(fig:ridges) using the *ggridges (2020)* package.A median line is drawn so as to compare the strength across the categories.It can be seen from the plot that password types such as *names*,*sport*,*cool-macho* and *nerdy-pop* are much higher in strength than the other categories as 50 % of these passwords have strength higher than 8.  
+The passwords in the dataset belong to 10 different categories like *simple-alphanumeric*, *animal* etc. To find which types of passwords are the strongest, the analysis focuses on the password strength and the time taken to crack them. In order to see the distribution of the strength of the passwords belonging to each category, a density plot is drawn below in figure \@ref(fig:ridges) using the *ggridges (2020)* package. A median line is drawn so as to compare the strength across the categories. It can be seen from the plot that password types such as *names*, *sport*, *cool-macho* and *nerdy-pop* are much higher in strength than the other categories as 50 % of these passwords have strength higher than 8.  
 
 ```{r ridges, fig.height= 6 , fig.cap="Password categories like 'simple-alphanumeric' have low strength compared to other categories"}
 
@@ -407,7 +407,7 @@ p
 
 ```
 
-For further investigation of evidences to determine which type of passwords are among the strongest, time to crack the passwords are also evaluated.In order to do so the mean of the variable *offline_crack_sec* is plotted against each category in the figure \@ref(fig:average) below. The figure below shows an interesting pattern that shows the category *rebellious-rude* passwords on an average takes the longest time to be hacked even though the median of the strength of its passwords are not as much as password types like *nerdy-pop* and *sport* .Similar pattern is seen in *password-related* type. It can also be seen that types like *fluffy* even though it has high strength , the average time to hack its password is very less.
+For further investigation of evidences to determine which type of passwords are among the strongest, time to crack the passwords are also evaluated. In order to do so the mean of the variable *offline_crack_sec* is plotted against each category in the figure \@ref(fig:average) below. The figure below shows an interesting pattern that shows the category *rebellious-rude* passwords on an average takes the longest time to be hacked even though the median of the strength of its passwords are not as much as password types like *nerdy-pop* and *sport*. A similar pattern is seen in *password-related* type. It can also be seen that types like *fluffy*, even though it has high strength, the average time to hack its password is quite low.
 
 ```{r average, fig.cap = "Password categories like 'simple-alphanumeric','fluffy' and 'food' are few of the weak categories"}
 
@@ -437,7 +437,7 @@ To answer the question of which password type is the strongest among these passw
 
 ## Is high strength related to longer password crack time ?
 
-The interesting pattern seen in the evaluation of password category strength and hacking time as well as seen in figure \@ref(fig:rankings) where the password ,*password* being ranked 1 in popularity and predictability takes comparatively longer time to get hacked, prompts the question,*Is high strength related to longer password crack time ?* To answer this question, the top 20 passwords that take the longest amount of time to get cracked as well as the top 20 passwords with high strength is taken into consideration. Apart from this, The password categories and its hacking time is also evaluated. 
+The interesting pattern seen in the evaluation of password category strength and hacking time as well as seen in figure \@ref(fig:rankings) where the password, *password* being ranked 1 in popularity and predictability takes comparatively longer time to get hacked, prompts the question,*Is high strength related to longer password crack time ?* To answer this question, the top 20 passwords that take the longest amount of time to crack as well as the top 20 passwords with high strength were taken into consideration. Apart from this, the password categories and its hacking time is also evaluated. 
 
 ```{r time, fig.cap= "30% of the passwords with high strength has long crack time" }
 # top 20 passwords with borth strength and long crack time
@@ -470,7 +470,7 @@ strength_time_plot
 
 ```
 
-As seen in the Figure \@ref(fig:time) , only 6 out of 20 passwords with high relative strength had long password crack time and figure @\@ref(fig:timestr) shows that there is no relationship between the hacking time and password strength. Therefore,it can be concluded that not all high strength takes longer to be hacked. 
+As seen in Figure \@ref(fig:time), only 6 out of 20 passwords with high relative strength had long password crack time and figure @\@ref(fig:timestr) shows that there is no relationship between the hacking time and password strength. Therefore, it can be concluded that not all high strength passwords take longer to be hacked. 
 
 ```{r timestr, fig.height=6,fig.cap= "There seems to be no apparent relationship between password strength and hacking time"}
 
@@ -495,7 +495,9 @@ ggplotly(time_strength)
 
 # Conclusion 
 
-Through the exploratory data analysis of the dataset on Top 500 commonly used passwords,it was observed that most people tend to choose passwords that can be easily remembered ,therefore a simple password that is related to a name or contains alphanumeric characters and roughly 6-7 characters long is chosen as password. On exploring further it was found that 43.6 % of the commonly used passwords are relatively high in strength and that around 3% of the passwords were of very high strength which varied greatly from typical passwords. Furthermore ,it was observed that among the password categories,types *rebellious-rude* ,*cool-macho* are considered strong and takes relatively more time to get hacked.Another striking discovery made while analyzing the data is that the hacking time and the strength of the passwords in the dataset is not under any strict relationship and that not all passwords with high strength takes long to be cracked and also, not all passwords with low strength are cracked easily as there have been instances of high strength password being hacked quicker than a low strength password. 
+Through the exploratory data analysis of the dataset on Top 500 commonly used passwords, it was observed that most people tend to choose passwords that can be easily remembered, therefore a simple password that is related to a name or contains alphanumeric characters and roughly 6-7 characters long is chosen as password. On further exploration it was found that 43.6 % of the commonly used passwords are relatively high in strength and that around 3% of the passwords were of very high strength which varied greatly from typical passwords.  
+
+Furthermore ,it was observed that among the password categories, types *rebellious-rude*, *cool-macho* are considered strong and take relatively more time to get hacked. Another striking discovery made while analyzing the data is that the hacking time and the strength of the passwords in the dataset is not under any strict relationship and that not all passwords with high strength take long to be cracked and also, not all passwords with low strength are cracked easily as there have been instances of high strength password being hacked quicker than a low strength password.   
 
 It can be concluded that most people choose common passwords that can be easily hacked and that using any of the passwords in the dataset is not recommended. 
 
