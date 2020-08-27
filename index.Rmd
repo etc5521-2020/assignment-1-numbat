@@ -98,11 +98,11 @@ library(bookdown)
 
   strong <- clean_passwords%>% 
   filter(!is.na(rank)) %>%
-   mutate(meter = case_when(strength >=0 & strength <4 ~ "weak", #categorising strength 
-                                   strength >=4 & strength < 6 ~ "medium",
-                                   strength >=6 & strength < 8 ~ "strong",
-                                   strength >=8 & strength <=10 ~ "very strong",
-                                   strength >10 ~ "takes time to crack"),
+   mutate(meter = case_when(strength >=0 & strength <4 ~ "very weak", #categorising strength 
+                                   strength >=4 & strength < 6 ~ "weak",
+                                   strength >=6 & strength < 8 ~ "medium",
+                                   strength >=8 & strength <=10 ~ "strong",
+                                   strength >10 ~ "very strong"),
                                    meter=as.factor(meter)) %>% 
   mutate(online_crack_sec = case_when(time_unit == "seconds" ~ value, # conversion of online cracking time into seconds. 
                              time_unit == "minutes" ~ value * 60,
@@ -151,14 +151,14 @@ plot <- plot_ly(plo,
 plot
 ```
 
-In the figure above , it can be seen that about 43.6 % of the commonly used passwords are passwords with strength between 8 and 10 on scale of 1-10 with 10 being the highest quality among these passwords.35.4 % of the passwords fall in the strong category having strength between 6 and 8 where as 9.2 % has a medium strength of 4-6.Around 3 % of the top 500 common passwords are of strength above 10 which is an interesting outlier because it varies greatly from the strength scale limits of 1-10 set in the dataset description. Weak category passwords of strength 0-4 constitute around 8.8 % of the passwords given. 
+In the figure above , it can be seen that about 43.6 % of the commonly used passwords are passwords with relative strength between 8 and 10 on scale of 1-10 with 10 being the highest quality among these passwords.35.4 % of the passwords fall in the medium category having relative strength between 6 and 8 where as 9.2 % has a weak strength of 4-6.Very Weak category passwords of strength 0-4 constitute around 8.8 % of the passwords given. Around 3 % of the top 500 common passwords are of strength above 10 which is an interesting outlier because it varies greatly from the strength scale limits of 1-10 set in the dataset description.Since these vary greatly from typical strength, the passwords with strength more than 10 will not be included in the data analysis. 
 
 Another important characteristic to judge a password is to analyze the time taken to crack it. In order to analyze the time taken to crack the popular passwords,the top 10 common passwords are taken into consideration by using *rank* as a variable.As seen in figure 2 , passwords like "1234","12345" ,"123456" and "12345678" are so popular as a word that it is very easily cracked taking approximately 0 seconds.Given the argument that popularity of the passwords is the reason that the passwords are predictable and therefore easily cracked,it is also interesting to see that "password" even though being the ranked one in popularity, is among passwords like "football" and "baseball" that takes relatively more time to get cracked. 
 
 ```{r rankings, fig.cap="Figure 7 : As expected 1234 is quick to be cracked"}
 
 options(scipen = 999)
-ranking <- strong %>% 
+ranking <- strong %>% filter(strength<=10) %>%
   arrange((rank)) %>%
   head(10) %>%
   ggplot(aes(y = password, x = offline_crack_sec, color = password)) +
@@ -175,53 +175,21 @@ ranking <- strong %>%
     axis.text.y = element_blank(),
     axis.ticks.y = element_blank()
   ) + 
-  xlab("Time taken to crack (seconds)")
-  ggtitle("Time taken to crack the 10 most common passwords")
-ggplotly(ranking)
-
-```
-
-The interesting pattern seen in "password" prompts the question,*Is high strength related to longer password crack time ?* To answer this question, the top 20 passwords that take the longest amount of time to get cracked as well as the top 20 passwords with high strength is taken into consideration.
-
-```{r time ,fig.cap="Figure 8 : 35% of the passwords with high strength has long crack time" }
-
-time_table <- strong %>% arrange(desc(offline_crack_sec)) %>%
-  head(20)
-strength_table <- strong %>%
-  arrange(desc(strength)) %>%
-  head(20)
-
-strength_time_plot <- strength_table %>%
-  filter(password %in% (time_table$password)) %>%
-  select(rank, password, offline_crack_sec, strength) %>%
-  ggplot(aes(y = password, x = offline_crack_sec, color = strength)) +
-  geom_point() +
+  xlab("Time taken to crack (seconds)")+
+  ggtitle("Time taken to crack the 10 most common passwords")+
   
-  geom_text(aes(label = password),
-            nudge_x = 0.25,
-            nudge_y = -0.3) +
-  theme_bw() +
-  theme(
-    axis.title.y = element_blank(),
-    axis.text.y = element_blank(),
-    axis.ticks.y = element_blank()
-  ) + xlab("Time taken to crack (seconds)") +
-  ggtitle("Passwords with high relative strength and long crack time")+
   theme(plot.title = element_text(hjust = 0.5))
-
-strength_time_plot
+ggplotly(ranking) 
 
 ```
-
-As seen in the Figure 8 , only 7 out of 20 passwords with high relative strength had long password crack time.Therefore,it can be concluded that not all high strength takes longer to be hacked. 
 
 ##  What are the strongest types of passwords?
 
 The passwords in the dataset belong to different categories like "simple-alphanumeric" ,"animal" etc.To find which types of passwords are the strongest,the analysis focuses on the password strength and the time taken to crack them . In order to see the distribuition of the strength of the passwords belonging to each category, a density plot is drawn below as figure 9 using the *ggridges (2020)* package.A median line is drawn so as to compare the strength across the categories.It can be seen from the plot that password types such as "names","sport","cool-macho" and "nerdy-pop" are much higher in strength than the other categories as 50 % of these passwords have strength higher than 8.  
 
-```{r, fig.height= 6}
+```{r, fig.height= 6 , fig.cap="Figure 8 : Password categories like 'simple-alphanumeric' have low strength compared to other categories"}
 
-p <- ggplot(strong, aes(y = category, x = strength, fill = category)) +
+p <- ggplot(data=(strong%>% filter(strength<=10)), aes(y = category, x = strength, fill = category)) +
   
   
   geom_density_ridges(
@@ -237,7 +205,9 @@ p <- ggplot(strong, aes(y = category, x = strength, fill = category)) +
   
   
   geom_text(
-    data = strong %>% group_by(category) %>% summarize(strength = median(strength)) %>%
+    data = strong %>%
+      filter(strength<=10)%>%
+      group_by(category) %>% summarize(strength = median(strength)) %>%
       filter((category != "animal")),
     aes(label = round(strength, digits = 1)),
     position = position_nudge(y = -0.15),
@@ -246,7 +216,9 @@ p <- ggplot(strong, aes(y = category, x = strength, fill = category)) +
   ) +
   
   geom_text(
-    data = strong %>% group_by(category) %>% summarize(strength = median(strength)) %>% filter(category ==
+    data = strong %>% 
+      filter(strength<=10)%>%
+      group_by(category) %>% summarize(strength = median(strength)) %>% filter(category ==
                                                                                                  "animal"),
     aes(label = paste0("median = ", round(strength, digits = 2))),
     position = position_nudge(y = -0.2),
@@ -265,16 +237,15 @@ p
 
 ```
 
+For further investigation of evidences to determine which type of passwords are among the strongest, time to crack the passwords are also evaluated.In order to do so the mean of the variable *offline_crack_sec* is plotted against each category in the figure 10 below. The figure below shows an interesting pattern that shows the category "rebellious-rude" passwords on an average takes the longest  time to be hacked even though the median of the strength of its passwords are not as much as password types like "nerdy-pop" and "sport".Similar pattern is seen in "password-related" types. It can also be seen that types like "fluffy" even though it has high strength , the average time to hack its password is very less.
 
-> How easy is it to crack your password? 
-
-```{r}
-strong %>% 
+```{r average_time ,fig.cap="Figure 9 : Password categories like 'simple-alphanumeric','fluffy' and 'food' are few of the weak categories"}
+strong %>% filter(strength<=10) %>%
   group_by(category) %>%
   summarise(average_time=mean(offline_crack_sec)) %>% 
    ggplot(aes(x=category, y= average_time,color=category))+
   geom_point(alpha = 2, size = 2) +
-  geom_text(aes(label= category),nudge_y = 0.25,check_overlap = TRUE)+
+  geom_text(aes(label= category),nudge_y = 0.01,check_overlap = TRUE)+
   scale_color_gdocs() +
   theme_bw() +
   theme(legend.position="none")  + 
@@ -287,21 +258,55 @@ strong %>%
   
 
 ```
+To answer the question of which password type is the strongest among these passwords, it can be said that "rebellious-rude" ,"cool-macho" type passwords are good contenders. 
 
+The interesting pattern seen in the evaluation of password category strength and hacking time as well as seen in figure 7 where the password ,"password" being ranked 1 in popularity and predictability takes comparitively longer time to get hacked, prompts the question,*Is high strength related to longer password crack time ?* To answer this question, the top 20 passwords that take the longest amount of time to get cracked as well as the top 20 passwords with high strength is taken into consideration. Apart from this, The password categories and its hacking time is also evaluated. 
 
-```{r , fig.height=6}
+```{r time ,fig.cap="Figure 10 : 30% of the passwords with high strength has long crack time" }
 
-time_strength <- strong %>% 
+time_table <- strong %>% filter(strength<=10) %>%
+  arrange(desc(offline_crack_sec)) %>%
+  head(20)
+strength_table <- strong %>%filter(strength<=10) %>%
+  arrange(desc(strength)) %>%
+  head(20)
+
+strength_time_plot <- strength_table %>%
+  filter(password %in% (time_table$password)) %>%
+  select(rank, password, offline_crack_sec, strength) %>%
+  ggplot(aes(y = password, x = offline_crack_sec, color = strength)) +
+  geom_point() +
+  
+  geom_text(aes(label = password))+
+           
+  theme_bw() +
+  theme(
+    axis.title.y = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank()
+  ) + xlab("Time taken to crack (seconds)") +
+  ggtitle("Passwords with high relative strength and long crack time")+
+  theme(plot.title = element_text(hjust = 0.5))
+
+strength_time_plot
+
+```
+
+As seen in the Figure 10 , only 6 out of 20 passwords with high relative strength had long password crack time and figure 11 shows that there is no relationship between the hacking time and password strength. Therefore,it can be concluded that not all high strength takes longer to be hacked. 
+
+```{r time_strength, fig.height=6,fig.cap="Figure 11 : There seems to be no apparent relationship between password strength and hacking time"}
+
+time_strength <- strong %>% filter(strength<=10) %>%
   ggplot(aes(x=(strength), y= offline_crack_sec,color=category))+
   geom_point(alpha = 2, size = 2) +
   scale_color_viridis_d() +
 theme_bw() +
    xlab("Relative Strength") +
   ylab("Time to crack,(s)") +
-  ggtitle("")
+  ggtitle("Hacking time Vs Relative Strength")+
+  theme(plot.title = element_text(hjust = 0.5))
 ggplotly(time_strength)
+  
 ```
-
-
 
 # References
