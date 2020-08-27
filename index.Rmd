@@ -15,9 +15,26 @@ output:
 [This assignment is for ETC5521 Assignment 1 by Team `r rmarkdown::metadata$team` comprising of `r knitr::combine_words(rmarkdown::metadata$author)`.]{style="color:#006DAE;"}
 
 ```{r setup, include = FALSE}
+## devtools::install_github("gadenbuie/ggpomological") #r package used for colors in fig 3.3 
+
 library(tidyverse)
 library(visdat)
 library(naniar)
+library(DT)
+library(kableExtra)
+library(htmltools)
+library(wordcloud)
+library(ggthemes)
+library(plotly)
+library(ggpomological) 
+library(tidyverse)
+library(plotly)
+library(ggplot2)
+library(ggridges)
+library(scales)
+library(ggthemes)
+library(crosstalk)
+library(devtools)
 
 
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, fig.align = 'center',warning=FALSE)
@@ -94,10 +111,6 @@ To address the first research question that was proposed, 'What are the common t
 
 Firstly, the table below provides a brief overview of the data that has been collected, containing the variables relating to the password used, its rank in the data set, the associated category and its relative strength. Simply looking at this table shows that many of the top ranked passwords in terms of popularity are quite simple in nature, containing ordered number or alphabetical series and simple words such as 'baseball' and 'football'. Surprisingly, the word 'password' itself holds the number one spot on the list. This table was made interactive using the *DT* (2020) package, allowing users to uncover what passwords made the top 500 and to see if even their own password is on the list.
 ```{r dataview}
-library(DT)
-library(kableExtra)
-library(htmltools)
-
 view_passwords <- clean_passwords %>%
   select(Password = password,
          "Popularity Rank" = rank,
@@ -113,7 +126,6 @@ datatable(view_passwords,
 Following this, a visual representation of the data was required to see if any further patterns could be uncovered that did not present themselves in the above tabular format. A wordcloud was chosen for this purpose due to its ability to quickly convey information about textual data. As these graphics typically are produced using the frequency that a word is used a new variable was required as a proxy for this dataset. To achieve this the data was ordered in inverse rank and then a row-number was assigned such that the password with rank equal to 1 would have an associated row number of 500. The data was then restricted to the top 50 entries and coloured by category. The following plot was produced using the *wordcloud* package (2018). 
 
 ```{r wordcloud, fig.cap = "50 most popular passwords"}
-library(wordcloud)
 ranked_passwords <- clean_passwords %>%
   filter(rank <=50) %>%
   arrange(-rank) %>%
@@ -135,9 +147,6 @@ The data set was broken into 10 groups relating to the 10 provided categories an
 
 
 ```{r category, message = FALSE, fig.cap = "Most popular password categories"}
-library(ggthemes)
-library(plotly)
-
 category_passwords <- clean_passwords %>%
   group_by(category) %>%
   summarise(Count = n()) %>%
@@ -256,25 +265,8 @@ Returning to the research question posed at the beginning, there are several sta
 
 The strength of these common passwords is an interesting feature to explore as variable *strength* is relative to the passwords in the dataset. Since these are commonly used passwords, their strength is expected to be less and easier to crack. The following analysis has been done to explore the dataset,to determine how strong the passwords are.Through out the analysis , the variable *offline_crack_sec* (the time taken to crack the password by offline guessing) is considered instead of the variable  *value* , which depicts the time taken to crack the password by online guessing , as both of these values are proportional to each other and the results remain the same during comparisons between passwords. 
 
-```{r , eval=FALSE}
-install.packages("devtools")
-devtools::install_github("gadenbuie/ggpomological") #r package used for colors in fig 3.3 
-
-```
-
 ```{r initial,echo=FALSE}
-
-library(ggpomological) 
-library(tidyverse)
-library(plotly)
-library(ggplot2)
-library(ggridges)
-library(scales)
-library(ggthemes)
-library(crosstalk)
-
-
-  strong <- clean_passwords%>% 
+strong <- clean_passwords%>% 
   filter(!is.na(rank)) %>%
    mutate(meter = case_when(strength >=0 & strength <4 ~ "very weak", #categorizing strength 
                                    strength >=4 & strength < 6 ~ "weak",
