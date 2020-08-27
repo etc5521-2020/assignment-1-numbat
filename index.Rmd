@@ -84,6 +84,18 @@ clean_passwords <- passwords %>%
 The strength of these common passwords is an interesting feature to explore as variable *strength* is relative to the passwords in the dataset. Since these are commonly used passwords, their strength is expected to be less and easier to crack. The following analysis has been done to explore the dataset,to determine how strong the passwords are.Through out the analysis , the variable *offline_crack_sec* (the time taken to crack the password by offline guessing) is considered instead of the variable  *value* , which depicts the time taken to crack the password by online guessing as both of these values are proportional to each other and the results remain the same while comparisons between passwords. 
 
 ```{r initial,echo=FALSE}
+library(ggplot2)
+library(ggpomological) 
+library(tidyverse)
+library(plotly)
+library(ggplot2)
+library(ggridges)
+library(scales)
+library(gganimate)
+library(ggthemes)
+library(crosstalk)
+library(bookdown)
+
   strong <- clean_passwords%>% 
   filter(!is.na(rank)) %>%
    mutate(meter = case_when(strength >=0 & strength <4 ~ "weak", #categorising strength 
@@ -111,17 +123,7 @@ devtools::install_github("gadenbuie/ggpomological")
 
 
 ```{r plo, warning=FALSE, echo=FALSE, message=FALSE,fig.cap= " Figure 6 : 43.6 % of the passwords are relatively high in strength"}
-library(ggplot2)
-library(ggpomological) 
-library(tidyverse)
-library(plotly)
-library(ggplot2)
-library(ggridges)
-library(scales)
-library(gganimate)
-library(ggthemes)
-library(crosstalk)
-library(bookdown)
+
 plo <- strong %>%
   group_by(meter) %>%  #proportion of the strength category 
   count(meter) %>%
@@ -210,6 +212,7 @@ strength_time_plot <- strength_table %>%
 strength_time_plot
 
 ```
+
 As seen in the Figure 8 , only 7 out of 20 passwords with high relative strength had long password crack time.Therefore,it can be concluded that not all high strength takes longer to be hacked. 
 
 ##  What are the strongest types of passwords?
@@ -261,6 +264,7 @@ p
 
 
 ```
+
 
 > How easy is it to crack your password? 
 
