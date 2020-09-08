@@ -6,6 +6,7 @@ Team members:
 
 * Aarathy Babu
 * Lachlan Thomas Moody
+* Dilinie Seimon
 
 # Steps
 
