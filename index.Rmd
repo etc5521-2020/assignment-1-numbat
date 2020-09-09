@@ -5,6 +5,8 @@ team: numbat
 author:
   - Aarathy Babu
   - Lachlan Moody
+  - Dilinie Seimon
+  - Jinhao Luo
 date: "`r Sys.Date()`"
 output: 
   bookdown::html_document2:
