@@ -70,6 +70,15 @@ Once this exploration area was established, three questions were composed to par
 2.	How strong are the common passwords?
 3.	Is high strength related to longer password crack time ?
 
+Besides, two additional questions would be raised to improve the report, which are: 
+
+4. What is the relationship of the online and offline cracking times of each password?
+5. How the type of character associated with the strength of password?
+
+The further analysis of the relationship of the online and offline cracking times of each password will be done in order to understand the underlying factors that might be impacting them.
+
+In addition, analysing the relationship between the types of character and the strength of passwords, like the type of the whole number, whole letter, uppercase-lowercase mixed, or number-letter mixed, which might give us the more clear sense of the reason of strong or weak passwords. 
+
 
 In order to address these areas and explore the field in greater depth, data was sourced from the book *Information is Beautiful* (2014). This contained information on 507 passwords derived from online databases *Skullsecurity* and *DigiNinja* collected in 2014. The data was provided in a tidy format and was read into R Studio in a csv format directly from the GitHub repository provided by *Tidy Tuesday* (2020) using the *readr* (2018) package. The data contained the following variables:
 
@@ -503,18 +512,6 @@ Through the exploratory data analysis of the dataset on Top 500 commonly used pa
 Furthermore ,it was observed that among the password categories, types 'rebellious-rude', 'cool-macho' are considered strong and take relatively more time to get hacked. Another striking discovery made while analyzing the data is that the hacking time and the strength of the passwords in the dataset is not under any strict relationship and that not all passwords with high strength take long to be cracked and also, not all passwords with low strength are cracked easily as there have been instances of high strength password being hacked quicker than a low strength password.   
 
 It can be concluded that most people choose common passwords that can be easily hacked and that using any of the passwords in the dataset is not recommended. 
-
-
-# Further analysis
-
-However, by reviewing the original report, two additional questions have been raised to improve the existing report. They are: 
-
-1. What is the relationship of the online and offline cracking times of each password?
-2. How the type of character associated with the strength of password?
-
-The further analysis of the relationship of the online and offline cracking times of each password will be done in order to understand the underlying factors that might be impacting them.
-
-In addition, analysing the relationship between the types of character and the strength of passwords, like the type of the whole number, whole letter, uppercase-lowercase mixed, or number-letter mixed, which might give us the more clear sense of the reason of strong or weak passwords. 
 
 
 
