@@ -75,9 +75,9 @@ Besides, two additional questions would be raised to improve the report, which a
 4. What is the relationship of the online and offline cracking times of each password?
 5. How the type of character associated with the strength of password?
 
-The further analysis of the relationship of the online and offline cracking times of each password will be done in order to understand the underlying factors that might be impacting them.
+A further analysis of the relationship of the online and offline cracking times of each password will be done in order to understand the underlying factors that might be impacting them.
 
-In addition, analysing the relationship between the types of character and the strength of passwords, like the type of the whole number, whole letter, uppercase-lowercase mixed, or number-letter mixed, which might give us the more clear sense of the reason of strong or weak passwords. 
+An analysis of the relationship between the type of characters included in the password such as numbers, special characters, uppercase-lowercase letters, or combination, and the strength of the password will also be done, which might give us a more clear understanding of the reasoning behind the strength of a password.
 
 
 In order to address these areas and explore the field in greater depth, data was sourced from the book *Information is Beautiful* (2014). This contained information on 507 passwords derived from online databases *Skullsecurity* and *DigiNinja* collected in 2014. The data was provided in a tidy format and was read into R Studio in a csv format directly from the GitHub repository provided by *Tidy Tuesday* (2020) using the *readr* (2018) package. The data contained the following variables:
