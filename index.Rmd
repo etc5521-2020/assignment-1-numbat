@@ -70,6 +70,8 @@ Once this exploration area was established, three questions were composed to par
 2.	How strong are the common passwords?
 3.	Is high strength related to longer password crack time ?
 
+A further analysis of the relationship of the online and offline cracking times of each password will be done in order to understand the underlying factors that might be impacting them.
+
 In order to address these areas and explore the field in greater depth, data was sourced from the book *Information is Beautiful* (2014). This contained information on 507 passwords derived from online databases *Skullsecurity* and *DigiNinja* collected in 2014. The data was provided in a tidy format and was read into R Studio in a csv format directly from the GitHub repository provided by *Tidy Tuesday* (2020) using the *readr* (2018) package. The data contained the following variables:
 
 - rank: popularity of password
