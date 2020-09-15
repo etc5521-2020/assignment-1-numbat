@@ -111,15 +111,8 @@ clean_passwords <- passwords %>%
   filter(!is.na(rank))
 ```
 
+Table \@ref(fig:dataview) allows exploration of a few variables of the passwords dataset; the password, its popularity rank, associated password category and its strength on a scale of 1-10. 
 
-# Analysis and findings
-
-
-## What are the common trends among the most commonly used passwords?
-
-To address the first research question that was proposed, 'What are the common trends among the most commonly used passwords?' the following analysis was undertaken.  
-
-Firstly, table \@ref(fig:dataview) below provides a brief overview of the data that has been collected, containing the variables relating to the password used, its rank in the data set, the associated category and its relative strength. Simply looking at this table shows that many of the top ranked passwords in terms of popularity are quite simple in nature, containing ordered number or alphabetical series and simple words such as 'baseball' and 'football'. Surprisingly, the word 'password' itself holds the number one spot on the list. This table was made interactive using the *DT* (2020) package, allowing users to uncover what passwords made the top 500 and to see if even their own password is on the list.
 ```{r dataview, fig.cap="Top 500 Most Popular Passwords"}
 view_passwords <- clean_passwords %>%
   select(Password = password,
@@ -133,6 +126,14 @@ datatable(view_passwords,
           caption = "Top 500 Most Popular Passwords", 
           class = "cell-border stripe")  ## Display data in an interactive table
 ```
+Purely based on this table, it can be observed that many of the popular passwords are quite simple, and contain ordered numbers or alphabetical series. Surprisingly, the word 'password' itself holds the number one spot on the list.
+
+# Analysis and findings
+
+
+## What are the common trends among the most commonly used passwords?
+
+To address the first research question that was proposed, 'What are the common trends among the most commonly used passwords?' the following analysis was undertaken.  
 
 Following this, a visual representation of the data was required to see if any further patterns could be uncovered that did not present themselves in the above tabular format. A wordcloud was chosen for this purpose due to its ability to quickly convey information about textual data. As these graphics typically are produced using the frequency that a word is used a new variable was required as a proxy for this dataset. To achieve this the data was ordered in inverse rank and then a row-number was assigned such that the password with rank equal to 1 would have an associated row number of 500. The data was then restricted to the top 50 entries and coloured by category. The following plot is displayed in Figure \@ref(fig:wordcloud) and was produced using the *wordcloud* package (2018). 
 
@@ -338,7 +339,7 @@ options(scipen = 999)
 ranking <- strong %>% filter(strength<=10) %>%
   arrange((rank)) %>%
   head(10) %>%
-  ggplot(aes(y = password, x = offline_crack_sec, color = password)) +
+  ggplot(aes(y = password, x = offline_crack_sec)) +
   geom_point() +
   
   geom_text(aes(label = password, size = -rank),
