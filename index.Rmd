@@ -70,7 +70,7 @@ Once this exploration area was established, five questions were composed to para
 
 1.	What are the most common passwords and password categories based on their popularity, usage, and length?
 2.	How strong are the common passwords?
-3.	Is high strength related to longer password crack time ?
+3.	Is a high password strength related to longer password crack time?
 4.  Is there a relationship among the online and offline password crack times ?
 5.  How are the types of characters associated with the strength of password?
 
@@ -313,7 +313,7 @@ The following analysis is done to identify which category of passwords is the st
 
 The following figure \@ref(fig:ridges) is a density plot of the distribution of strengths of passwords belonging to each category. The median strength value of each category is marked to improve readability.
 
-```{r ridges, fig.height= 6 , fig.cap="Password categories like 'simple-alphanumeric' have low strength compared to other categories"}
+```{r ridges, fig.height= 6 , fig.cap="Distribution of strengths of passwords belonging to each category"}
 
 # distribution of strength of password types
 
@@ -377,63 +377,33 @@ strong %>% filter(strength <= 10) %>%
 ```
 Through the above analysis it can be identified that the password categories 'rebellious-rude' and 'cool-macho' are the strongest while 'simple-alphanumeric' is the weakest.
 
-## Is high strength related to longer password crack time ?
+## Is a high password strength related to longer password crack time?
 
-The interesting pattern seen in the evaluation of password category strength and hacking time as well as seen in figure \@ref(fig:rankings) where the password, 'password' being ranked 1 in popularity and predictability takes comparatively longer time to get hacked, prompts the question,*Is high strength related to longer password crack time ?* To answer this question, the top 20 passwords that take the longest amount of time to crack as well as the top 20 passwords with high strength were taken into consideration. Apart from this, the password categories and its hacking time is also evaluated. 
+The contradicting conclusion on relationship between the strength of passwords and their crack times arrived at from figure \@ref(fig:ridges), table \@ref(tab:average), and table \@ref(tab:rankings), proposes the question *Is high strength related to longer password crack time?*
 
-```{r time, fig.cap= "30% of the passwords with high strength has long crack time" }
-# top 20 passwords with borth strength and long crack time
+In identifying the realtionship between the strength of passwords and the time to crack them, figure \@ref(fig:time) was used. The data points are colored by category while the axis were put on log scales to minimize superimposing points and for making the plot easier to understand. 
 
-time_table <- strong %>% filter(strength <= 10) %>%
-  arrange(desc(offline_crack_sec)) %>%
-  head(20)
-strength_table <- strong %>% filter(strength <= 10) %>%
-  arrange(desc(strength)) %>%
-  head(20)
 
-strength_time_plot <- strength_table %>%
-  filter(password %in% (time_table$password)) %>%
-  select(rank, password, offline_crack_sec, strength) %>%
-  ggplot(aes(y = password, x = offline_crack_sec, color = strength)) +
+```{r time, fig.cap= "Strength of passwords vs. the time to crack them" }
+interactive(
+  strong %>%
+  filter(strength <= 10) %>%
+  ggplot(aes(x = strength,
+             y = offline_crack_sec,
+             color = category)) +
   geom_point() +
-  
-  geom_text(aes(label = password)) +
-  
+  scale_x_continuous(trans='log10') +
+  scale_y_continuous(trans='log10') +
   theme_bw() +
-  theme(
-    axis.title.y = element_blank(),
-    axis.text.y = element_blank(),
-    axis.ticks.y = element_blank()
-  ) + xlab("Time taken to crack (seconds)") +
-  ggtitle("Passwords with high relative strength and long crack time") +
-  theme(plot.title = element_text(hjust = 0.5))
-
-strength_time_plot
-
+  labs(x = "Strength",
+       y = "Time to crack (seconds)")
+)
 ```
 
-As seen in Figure \@ref(fig:time), only 6 out of 20 passwords with high relative strength had long password crack time and figure \@ref(fig:timestr) shows that there is no relationship between the hacking time and password strength. Therefore, it can be concluded that not all high strength passwords take longer to be hacked. 
+No clear relationship can be identified between the time to crack and the strength of the passwords, leading us to beleive that the basis for defining the strength of a password is not the time to crack.
 
-```{r timestr, fig.height=6,fig.cap= "There seems to be no apparent relationship between password strength and hacking time"}
+Another intersting pattern observed through figure \@ref(fig:time) are the horizontal and vertical lines formed by the data points, which leads us to question the accuracy of the dataset.
 
-# testing relationship between time and strength
-
-time_strength <- strong %>% filter(strength <= 10) %>%
-  ggplot(aes(
-    x = (strength),
-    y = offline_crack_sec,
-    color = category
-  )) +
-  geom_point(alpha = 2, size = 2) +
-  scale_color_viridis_d() +
-  theme_bw() +
-  xlab("Relative Strength") +
-  ylab("Time to crack,(s)") +
-  ggtitle("Hacking time Vs Relative Strength") +
-  theme(plot.title = element_text(hjust = 0.5))
-ggplotly(time_strength)
-  
-```
 ## Is there a relationship among the online and offline password crack times ?
 
 Since the time to crack a password offline was used throughout the above analysis, it would be interesting to analyse the relationship between the online and offline times spent on cracking passwords.
