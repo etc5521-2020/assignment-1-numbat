@@ -202,7 +202,9 @@ Another area of interest in relation to this question was password length. While
 
 Once calculated, a frequency distribution was produced of the resulting variable. To better compare the length distribution across categories, a percent stacked bar chart was also plotted. The columns have been coloured relative to category and are the same across the two plots. Figure \@ref(fig:length) was also made interactive using *plotly* (2020).
 
-```{r length, fig.cap = "Most popular password lengths"}
+```{r length, fig.cap = "Most popular password lengths", eval=FALSE}
+# This is the original code chunk for Figure 3.4
+
 length_passwords <- clean_passwords %>%
   mutate(length = nchar(password)) ## Create a new variable measuring the length of each password in the list
 
@@ -231,9 +233,54 @@ subplot(interactive(plot_length),
        nrows = 1,
        margin = 0.1)
 ```
-First concerning the frequency distribution, there is a mostly normal distribution of the data with a slight left skew. There is however, a clear peak in the middle of the data set indicating that a majority of passwords in the data set are 6 characters long or more. This may be due to password requirements on many websites and programs that require a minimum number of characters rather than a personal preference. The longest password recorded, 9 characters, was the only one in its group supporting the previous statements that people may prefer simpler passwords.  
 
-While the first plot does give some indication to the distribution of categories across lengths, the second plot allows for more direct comparisons. First of all, the 'name' category appears to be the most popular across all lengths except among the smallest and largest groups. This is reasonable as it is less common for names to contain few or many characters, whereas 4 digit passwords lend themselves to a birth date or a year. A second area of interest is that the largest password in the data set is of the 'simple-alphanumeric' category. Upon further investigation this was found to be related to the string '123456789'. This is further evidence that most passwords are characteristically simple and easy to remember which is reasonable considering they need to be recalled on a regular basis. Perhaps unreasonably though, this does indicate a potential vulnerability in general password security.  
+```{r figure-improvement-one}
+# This is the improvement for Figure3.4
+
+# Create a new variable measuring the length of each password in the list
+length_passwords <- clean_passwords %>%
+  mutate(length = nchar(password)) 
+
+# Create a density and histogram to show the passwords length distribution
+plot_density_histogram <- length_passwords %>% 
+  #arrange(length) %>% 
+  ggplot(aes(x = length, y = ..density..)) + 
+  geom_histogram(binwidth = 1,
+                 colour = "blue",
+                 fill = "blue",
+                 alpha = 0.3) +
+  geom_density(aes(y = 0.001*..count..),
+               colour = "blue",
+               fill = "blue", 
+               alpha = 0.3) + 
+  scale_x_continuous(breaks = c(4,5,6,7,8,9)) +
+  theme_bw() +
+  xlab("Password Length") +
+  ggtitle("Password lengths distribution")
+plot_density_histogram
+
+
+# Create a bar chart to show the number of each passwords length by each category.
+plot_bar <- length_passwords %>%
+  mutate(category = fct_rev(fct_infreq(category))) %>%
+  ggplot(aes(x = length)) +
+  geom_bar() +
+  theme_bw() +
+  xlab("Password Length") +
+  facet_wrap(~category) + 
+  scale_x_continuous(breaks = c(4,5,6,7,8,9))
+  
+grid.arrange(plot_density_histogram,
+             plot_bar,
+             ncol = 1)
+
+
+```
+
+
+First concerning the passwords-length distribution, there is a mostly normal distribution of the data with a slight left skew. There is however, a clear peak in the middle of the data set indicating that a majority of passwords in the data set are 6 characters long or more. This may be due to password requirements on many websites and programs that require a minimum number of characters rather than a personal preference. The longest password recorded, 9 characters, was the only one in its group supporting the previous statements that people may prefer simpler passwords.  
+
+While the upper plot does give some indication to the distribution of categories across lengths, the lower plot allows for more direct comparisons. First of all, the 'name' category appears to be the most popular across all lengths except among the smallest and largest groups. This is reasonable as it is less common for names to contain few or many characters, whereas 4 digit passwords lend themselves to a birth date or a year. A second area of interest is that the largest password in the data set is of the 'simple-alphanumeric' category. Upon further investigation this was found to be related to the string '123456789'. This is further evidence that most passwords are characteristically simple and easy to remember which is reasonable considering they need to be recalled on a regular basis. Perhaps unreasonably though, this does indicate a potential vulnerability in general password security.  
 
 Examining the in-depth summary table \@ref(tab:summary) produced using *kableExtra* (2019) below provides some additional insight into the data.  
 
