@@ -507,7 +507,7 @@ Since the time to crack a password offline was used throughout the above analysi
 Figure \@ref(fig:online-vs-offline) represents a plot of the online vs offline times spent on cracking passwords in seconds. The values on both the axis have been put on log scales to minimize superimposing points and for making the plot easier to understand, while the plot has also been sub-divided into facets based on the category of password.
 
 ```{r online-vs-offline, fig.cap="Online vs offline crack times of different categories of passwords"}
-layout_ggplotly <- function(gg, x = -0.14, y = -0.06){
+layout_ggplotly <- function(gg, x = -0.14, y = -0.07){
   gg[['x']][['layout']][['annotations']][[1]][['y']] <- x
   gg[['x']][['layout']][['annotations']][[2]][['x']] <- y
   gg
