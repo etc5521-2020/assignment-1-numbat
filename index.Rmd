@@ -292,9 +292,6 @@ strong <- clean_passwords%>%
                              time_unit == "weeks" ~ value * 60 * 60 * 24 * 7,
                              time_unit == "months" ~ value * 60 * 60 * 24 * 365/12,
                              time_unit == "years" ~ value * 60 * 60 * 24 * 365))
-
-
-
 ```
 
 
@@ -505,6 +502,60 @@ ggplotly(time_strength)
 ```
 ## Is there a relationship among the online and offline password crack times ?
 
+Since the time to crack a password offline was used throughout the above analysis, it would be interesting to analyse the relationship between the online and offline times spent on cracking passwords.
+
+Figure \@ref(fig:online-vs-offline) represents a plot of the online vs offline times spent on cracking passwords in seconds. The values on both the axis have been put on log scales to minimize superimposing points and for making the plot easier to understand, while the plot has also been sub-divided into facets based on the category of password.
+
+```{r online-vs-offline, fig.cap="Online vs offline crack times of different categories of passwords"}
+layout_ggplotly <- function(gg, x = -0.14, y = -0.06){
+  gg[['x']][['layout']][['annotations']][[1]][['y']] <- x
+  gg[['x']][['layout']][['annotations']][[2]][['x']] <- y
+  gg
+}
+
+ggplotly(
+  strong %>%
+  select(password, category, offline_crack_sec, online_crack_sec) %>%
+    ggplot(aes(x = offline_crack_sec,
+               y = online_crack_sec,
+               color = category)) +
+    geom_point() +
+    facet_wrap(~category, ncol = 5) +
+    scale_x_continuous(trans='log10', label=scientific_format()) +
+    scale_y_continuous(trans='log10', label=scientific_format()) +
+    theme_bw() +
+    theme(legend.position = "none",
+          axis.text.x = element_text(angle = 90, hjust = 1)) +
+    labs(x = "Offline Crack Time (seconds)",
+         y = "Online Crack Time (seconds)")
+)%>% layout_ggplotly
+
+```
+
+
+It's interesting how linear the realtionship among the online and offline crack times across all password categories. The crack times (both online and offline) of passwords belonging to the simple-alphanumeic category are spread across a wide range of values while the passwords belonging to the rebellious-rude category are only spread across a smaller range of values.
+
+Figure \@ref(fig:error-bar) represents the top 10 passwords with the highest difference of online and offline crack time. The red dots represent the offline password crack time in secods while the black dots represent the online password crack time in seconds. It's interesting how all top 10 passwords with the highest differences record a lower offline crack time in comparison to the online crack time.
+
+
+```{r error-bar, fig.cap="Top 10 passwords with the highest difference in online and offline crack times"}
+options(scipen = 999)
+ggplotly(
+strong %>%
+  mutate(diff = abs(offline_crack_sec - online_crack_sec)) %>%
+  arrange(desc(diff)) %>%
+  head(10) %>%
+  ggplot() +
+  geom_point(aes(x = offline_crack_sec, y = reorder(password, diff)), size = 3, color = "red")+
+  geom_point(aes(x = online_crack_sec, y = password), size = 3, color = "black")+
+  geom_segment(aes(x = offline_crack_sec, xend = online_crack_sec, y = password, yend = password, color = category)) +
+  labs(x = "Difference in online and offline cracking times",
+       y = "Password")
+)
+```
+
+Passwords belonging to the categories of name, sport and password-related dominate the list of top most passwords with the highest difference of online and offline crack time. It can be assumed that password categories that make more sense to people are much easier to crack offline.
+It's also interesting how the online and offline crack time values across certain passwords are the same, which may lead us to question the accuracy of the dataset used.
 
 # Conclusion 
 
