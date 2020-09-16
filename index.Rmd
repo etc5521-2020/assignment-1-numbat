@@ -294,7 +294,25 @@ Through figure \@ref(fig:plo), it can be seen that about 3% of the passwords are
 
 The 3% of the top 500 common passwords categorized as very strong were assigned a strength value above 10 and since it is populated significantly outside the strength range of 1-10, they will be excluded from the analysis. 
 
-Another important basis to judge the strength of a password, is to analyze the time taken to crack it. Table \@ref(tab:rankings) lists the time to crack the top 10 most popular passwords and is sorted by the popularity rank.
+
+Another important basis to judge the strength of a password, is to analyze the time taken to crack it. Figure \@ref(fig:general-distribution) shows the time to crack distribution of all passwords which the strength is less than or equal to 10. The cracking time distribution is significant right-skewed, there are some outliers. In general, the time to crack the passwords is less than 0.25 second, which might implicate that most passwords are easier to be cracked. Some passwords, however, show a longer time to crack, which is more than 2 seconds. But they only account for a little part of the whole passwords. Will the popular passwords also within this small part? A further exploration will be required to identify the relationship between popularity and time to crack.
+```{r general-distribution, fig.cap="Cracking time distribution of all passwords (strength <= 10)"}
+crack_dis <- strong %>% 
+  filter(strength<=10) %>% 
+  ggplot(aes(x = offline_crack_sec, y = ..density..)) + 
+  geom_histogram(colour = "blue",
+                 fill = "blue",
+                 alpha = 0.3) + 
+  geom_density(colour = "blue",
+                 fill = "blue",
+                 alpha = 0.3) + 
+  xlab("Time to crack (seconds)") +
+  theme_bw()
+
+crack_dis
+```
+
+
 
 ```{r rankings}
 strong %>% filter(strength<=10) %>%
@@ -307,7 +325,9 @@ strong %>% filter(strength<=10) %>%
   kable(caption = "Time to crack the 10 most popular passwords") %>%
   kable_styling(bootstrap_options = c("striped", "hover", "border"))
 ```
-It's interesting to see how most of the top 10 popular passwords take less than a second to crack, while 3 or them take approximately 2 seconds to crack. However, an argument can be made that the popularity of the passwords is the reason that the passwords are predictable and therefore easily cracked.
+
+Table \@ref(tab:rankings) lists the time to crack the top 10 most popular passwords and is sorted by the popularity rank. It's interesting to see how most of the top 10 popular passwords take less than a second to crack, while 3 or them take approximately 2 seconds to crack. However, an argument can be made that the popularity of the passwords is the reason that the passwords are predictable and therefore easily cracked.
+
 
 The following analysis is done to identify which category of passwords is the strongest, in terms of the distribution of passwords with different strengths.
 
