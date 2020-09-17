@@ -478,14 +478,102 @@ strong %>%
 Passwords belonging to the categories of name, sport and password-related dominate the list of top most passwords with the highest difference of online and offline crack time. It can be assumed that password categories that make more sense to people are much easier to crack offline.
 It's also interesting how the online and offline crack time values across certain passwords are the same, which may lead us to question the accuracy of the dataset used.
 
+## How the type of character and length associated with the strength of password?
+
+Since the report has discussed the relationship between the strength and popularity of the passwords, as well as the relationship between passwords strength and crack time. Password strength could help to reflect the safety of passwords. However, how the passwords to be defined as strong or weak. This section would focus on the classification mechanism of passwords strength. To identify the relationship between passwords characteristics and passwords strength, as well as the relationship between passwords length and passwords strength.
+
+Firstly, this section would focus on the length and strength of passwords. Figure \@ref(fig；password-characteristic) shows the distribution of the passwords strength by difference password length. According to Figure \@ref(fig；password-characteristic), the strength of passwords increases with the length of passwords, except the length of 9 letters. The possible reason might be only one password with a length of 9, while the level of strength is also low. Therefore, this password strength could not be considered representative of the passwords with a length of 9. In general, passwords length of 7 and 8 have the highest median among the group, which is the strength of 8. While, there are some outliers in these two types of length, which are all higher than the strength of 19, and could be considered as very strong passwords. Besides, the median of the strength of passwords with a length of 5 and 6 is the same as 7, and the strength of length in 4 is 6, respectively. However, even though the median strength of length of 5 and 6 is lower than that of the length of 7 and 8, the strength of some passwords with a length of 5 and 6 is still higher than the strength of passwords with a length of 7 and 8. A possible reason might be the character complexity and it would be discussed in the next section. 
+
+By further analysing the relationship between length and strength, Table \@ref(tab:length-strength-summary) has been used for displaying the summary statistics of the length and strength of passwords. It is clear that the average strength increases with the length of passwords. Although the strength of passwords has a slight decrease from the length of 7 to 8, the password length of 8 accounts for the highest strength which is 48. 
+
+```{r password-characteristic}
+# find the characteristic in integer.
+passwords_char <- strong %>% 
+  drop_na() %>%
+  mutate(password=as.integer(password)) %>% 
+  mutate(characteristic = 
+           if_else(
+             is_integer(password),
+             "number",
+             "no"
+           )) %>% 
+  filter(!is.na(password))
+
+
+# find the characteristic in character.
+passwords_char <- merge(strong, passwords_char, all = TRUE)
+passwords_char[is.na(passwords_char)] <- "character"
+
+# find the characteristic in character and integer mixed.
+number <- c(26,149,197,321,336,344,359,395,406,407,463,478,500)
+for (i in 1:length(number)) {
+  a <- number[i]
+  passwords_char$characteristic[a] <- "chr & num"
+}
+```
+
+```{r length-strength, fig.cap="Boxplot of password strength by the passwords length"}
+strong %>% 
+  mutate(length = nchar(password)) %>%
+  ggplot(aes(length, strength, group = length)) +
+  geom_boxplot() + 
+  scale_x_continuous(breaks = c(4,5,6,7,8,9)) + 
+  scale_y_continuous(n.breaks = 30) +
+  theme_bw() 
+```
+
+```{r length-strength-summary}
+strong %>% 
+  mutate(length = nchar(password)) %>%
+  group_by(length) %>% 
+  summarise(minimum = min(strength),
+            mean = mean(strength),
+            median = median(strength),
+            maximum = max(strength)) %>% 
+  kable(caption = "Summary table of passwords strength by passwords length") %>% 
+  kable_styling(bootstrap_options = c("bordered", "hover", "striped"))
+```
+
+Furthermore, this report would also analysis the relationship between different types of character and the strength of passwords. This section would consider the impact of characteristics of passwords, like numbers, characters, and number and character combination on the strength of passwords. Figure \@ref(fig:characteristic-strength) shows the distribution of passwords strength by each characteristic. It is clear that the passwords with pure numbers have the lowest median strength, which is 1. The median strength of passwords with pure characters is higher than that of pure numbers passwords, which is around 7. However, the strength of pure character passwords is still weak, compared with the passwords with characters combination. The median strength of the mixed passwords is around 36, which is a huge gap compared with the other two types of passwords. It could indicate that the mixed passwords have represented the safest passwords among those passwords, because of the highest median strength, as well as all the passwords strength of the combined passwords is higher than 10 and could be considered as the level of very strong. 
+
+In addition, Table \@ref(tab:characteristic-strength-summary) provides summary statistics about the strength of passwords of different types of character. The characters and number combination passwords have the highest level of security, which accounts for an average strength of 35.5, and maximum strength of 48. Maybe the complexity of that kind of password, which might contribute to the very strong level of that passwords. Besides, the strength of pure character passwords is stronger than that of pure numbers passwords. The mean strength of pure characters passwords is around five higher than the mean strength of pure numbers. One possible reason may be more letters than numbers, which would help pure character passwords generate more combinations and make them more complex. 
+
+In conclusion, the increase in passwords length could contribute to the safety of the passwords. Furthermore, the characteristics of passwords would also impact on the security of the passwords. The characters-numbers mixed passwords could be considered as the strongest passwords because of the complexity. Besides, because of the difference in the number of letters and numbers. The pure letters password could be considered more complex and stronger than the password of the pure numbers. 
+
+```{r characteristic-strength, fig.cap="Boxplot of password strength by the types of passwords character"}
+passwords_char %>% 
+  ggplot(aes(reorder(characteristic, strength), 
+             strength, 
+             group = characteristic, 
+             colour = characteristic)) +
+  geom_boxplot() +
+  theme_bw() + 
+  scale_colour_discrete(breaks=c("number",
+                                 "character",
+                                 "chr & num"))
+  
+```
+
+```{r characteristic-strength-summary}
+passwords_char %>% 
+  group_by(characteristic) %>% 
+  summarise(minimum = min(strength),
+            mean = mean(strength),
+            median = median(strength),
+            maximum = max(strength)) %>% 
+  arrange(desc(mean)) %>% 
+  kable(caption = "Summary table of passwords strength by passwords characteristics") %>% 
+  kable_styling(bootstrap_options = c("bordered", "hover", "striped"))
+```
+
 # Conclusion 
 
 Through the exploratory data analysis of the dataset on Top 500 commonly used passwords, it was observed that most people tend to choose passwords that can be easily remembered, therefore a simple password that is related to a name or contains alphanumeric characters and roughly 6-7 characters long is chosen as password. On further exploration it was found that 43.6 % of the commonly used passwords are relatively high in strength and that around 3% of the passwords were of very high strength which varied greatly from typical passwords.  
 
 Furthermore ,it was observed that among the password categories, types 'rebellious-rude', 'cool-macho' are considered strong and take relatively more time to get hacked. Another striking discovery made while analyzing the data is that the hacking time and the strength of the passwords in the dataset is not under any strict relationship and that not all passwords with high strength take long to be cracked and also, not all passwords with low strength are cracked easily as there have been instances of high strength password being hacked quicker than a low strength password.   
 
-It can be concluded that most people choose common passwords that can be easily hacked and that using any of the passwords in the dataset is not recommended. 
+Therefore, it can be concluded that most people choose common passwords that can be easily hacked and that using any of the passwords in the dataset is not recommended. 
 
-
+In addition, because of the positive relationship between the password length and password strength, as well as the impact of password characteristics on password safety. This report would recommend that users should try to increase the password length to improve password security when signing up accounts. Meanwhile, the users could use a more complex password combination, like numbers and characters mixed to increase the strength of passwords. The pure numbers passwords would not be recommended because of the low password strength. 
 
 # References
