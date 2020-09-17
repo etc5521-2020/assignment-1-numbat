@@ -401,7 +401,7 @@ Through the above analysis it can be identified that the password categories 're
 
 The contradicting conclusion on relationship between the strength of passwords and their crack times arrived at from figure \@ref(fig:ridges), table \@ref(tab:average), and table \@ref(tab:rankings), proposes the question *Is high strength related to longer password crack time?*
 
-In identifying the realtionship between the strength of passwords and the time to crack them, figure \@ref(fig:time) was used. The data points are colored by category while the axis were put on log scales to minimize superimposing points and for making the plot easier to understand. 
+In identifying the relationship between the strength of passwords and the time to crack them, figure \@ref(fig:time) was used. The data points are colored by category while the axis were put on log scales to minimize superimposing points and for making the plot easier to understand. 
 
 
 ```{r time, fig.cap= "Strength of passwords vs. the time to crack them" }
@@ -420,7 +420,7 @@ interactive(
 )
 ```
 
-No clear relationship can be identified between the time to crack and the strength of the passwords, leading us to beleive that the basis for defining the strength of a password is not the time to crack.
+No clear relationship can be identified between the time to crack and the strength of the passwords, leading us to believe that the basis for defining the strength of a password is not the time to crack.
 
 Another intersting pattern observed through figure \@ref(fig:time) are the horizontal and vertical lines formed by the data points, which leads us to question the accuracy of the dataset.
 
@@ -485,7 +485,7 @@ It's also interesting how the online and offline crack time values across certai
 
 Since the report has discussed the relationship between the strength and popularity of the passwords, as well as the relationship between passwords strength and crack time. Password strength could help to reflect the safety of passwords. However, how the passwords to be defined as strong or weak. This section would focus on the classification mechanism of passwords strength. To identify the relationship between passwords characteristics and passwords strength, as well as the relationship between passwords length and passwords strength.
 
-Firstly, this section would focus on the length and strength of passwords. Figure \@ref(fig；password-characteristic) shows the distribution of the passwords strength by difference password length. According to Figure \@ref(fig；password-characteristic), the strength of passwords increases with the length of passwords, except the length of 9 letters. The possible reason might be only one password with a length of 9, while the level of strength is also low. Therefore, this password strength could not be considered representative of the passwords with a length of 9. In general, passwords length of 7 and 8 have the highest median among the group, which is the strength of 8. While, there are some outliers in these two types of length, which are all higher than the strength of 19, and could be considered as very strong passwords. Besides, the median of the strength of passwords with a length of 5 and 6 is the same as 7, and the strength of length in 4 is 6, respectively. However, even though the median strength of length of 5 and 6 is lower than that of the length of 7 and 8, the strength of some passwords with a length of 5 and 6 is still higher than the strength of passwords with a length of 7 and 8. A possible reason might be the character complexity and it would be discussed in the next section. 
+Firstly, this section would focus on the length and strength of passwords. Figure \@ref(fig:length-strength) shows the distribution of the passwords strength by difference password length. According to Figure \@ref(fig:length-strength), the strength of passwords increases with the length of passwords, except the length of 9 letters. The possible reason might be only one password with a length of 9, while the level of strength is also low. Therefore, this password strength could not be considered representative of the passwords with a length of 9. In general, passwords length of 7 and 8 have the highest median among the group, which is the strength of 8. While, there are some outliers in these two types of length, which are all higher than the strength of 19, and could be considered as very strong passwords. Besides, the median of the strength of passwords with a length of 5 and 6 is the same as 7, and the strength of length in 4 is 6, respectively. However, even though the median strength of length of 5 and 6 is lower than that of the length of 7 and 8, the strength of some passwords with a length of 5 and 6 is still higher than the strength of passwords with a length of 7 and 8. A possible reason might be the character complexity and it would be discussed in the next section. 
 
 By further analysing the relationship between length and strength, Table \@ref(tab:length-strength-summary) has been used for displaying the summary statistics of the length and strength of passwords. It is clear that the average strength increases with the length of passwords. Although the strength of passwords has a slight decrease from the length of 7 to 8, the password length of 8 accounts for the highest strength which is 48. 
 
@@ -553,7 +553,8 @@ passwords_char %>%
   theme_bw() + 
   scale_colour_discrete(breaks=c("number",
                                  "character",
-                                 "chr & num"))
+                                 "chr & num")) + 
+  xlab("characteristic")
   
 ```
 
