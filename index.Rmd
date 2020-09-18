@@ -46,6 +46,11 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, fig.align = 'center',warnin
 ```
 
 
+<style>
+body {
+text-align: justify}
+</style>
+
 # Introduction and motivation
 
 2020 was a bad year for passwords. A recent audit of the 'dark web' reported on by Forbes unveiled that over 15 billion stolen logins were currently circulating online [Winder, 2020](https://www.forbes.com/sites/daveywinder/2020/07/08/new-dark-web-audit-reveals-15-billion-stolen-logins-from-100000-breaches-passwords-hackers-cybercrime/#73a17f4180fb). As stated in the article, for perspective, this represents two sets of account logins for every person on the planet.  
