@@ -57,7 +57,9 @@ text-align: justify}
 
 This was the result of more than 100,000 data breaches relating to cyber crime activities, a 300% increase since 2018. So in an age where everybody is leaving an ever growing digital record of their activities from social media to banking, what can the average person do to bolster their security online?  
 
-The following analysis will explore this current issue in depth using a compilation of some of the most commonly used passwords on the web. It should be noted however that the original data was compiled in September of 2014. There is a possibility therefore that the trends and findings discussed below are not entirely applicable to the modern day. To ensure full relevancy a more up to date collection would be required. However, it is reasonable to assume the underlying foundations of password security have not changed all that much in the past few years. Additionally, the strength rating provided is calculated relative to all the other passwords in the data set. As laid out in the provided documentation, as these common passwords are mostly all 'bad', a high strength rating does not necessarily indicate that a password is hard to crack. But there are additional variables that allow this to be calculated. While the crack time for passwords either online or offline might not be sufficient to indicate the strength of the passwords due to the inaccuracy of crack time, which might be another limitation of this report. And it would be discussed in the following sections. Finally, the report would focus on the measurement of the strength level measurement, which is analysing the impact of the length of passwords and the character types of passwords on the strength of passwords, in order to identify the relationship and raise some helpful suggestions for password setting. Detailed information of the data used and the research questions formulated are provided in the following section. 
+The following analysis will explore this current issue in depth using a compilation of some of the most commonly used passwords on the web. It should be noted however that the original data was compiled in September of 2014. There is a possibility therefore that the trends and findings discussed below are not entirely applicable to the modern day. To ensure full relevancy a more up to date collection would be required. However, it is reasonable to assume the underlying foundations of password security have not changed all that much in the past few years. Additionally, the strength rating provided is calculated relative to all the other passwords in the data set. As laid out in the provided documentation, as these common passwords are mostly all 'bad', a high strength rating does not necessarily indicate that a password is hard to crack.
+
+While the time taken to crack a password might not be sufficient to indicate the strength of the passwords, this report will also analyse the impact of the type and number of characters of passwords impacting the strength of passwords, in order to provide some insights and suggestions for password setting. Detailed information of the data used, and the research questions formulated are provided in the following section. 
 
 
 # Data description
@@ -66,7 +68,7 @@ passwords <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/
  
 ```
 
-Based upon the motivations discussed above, the following research questions were formulated. The primary subject of interest being:
+Based on the motivations discussed above, the following research questions were formulated. The primary subject of interest being:
 
 > What are the characteristics of the most common passwords in the interest of security? 
 
@@ -77,11 +79,7 @@ Once this exploration area was established, five questions were composed to para
 2.	How strong are the common passwords?
 3.	Is a high password strength related to longer password crack time?
 4.  Is there a relationship among the online and offline password crack times ?
-5.  How the type of character and length associated with the strength of password?
-
-A further analysis of the relationship of the online and offline cracking times of each password will be done in order to understand the underlying factors that might be impacting them.
-
-An analysis of the relationship between the type of characters included in the password such as numbers, special characters, uppercase-lowercase letters, or combination, and the strength of the password will also be done, which might give us a more clear understanding of the reasoning behind the strength of a password.
+5.  How does the type of characters and length associated with the strength of password?
 
 
 In order to address these areas and explore the field in greater depth, data was sourced from the book *Information is Beautiful* (2014). This contained information on 507 passwords derived from online databases *Skullsecurity* and *DigiNinja* collected in 2014. The data was provided in a tidy format and was read into R Studio in a csv format directly from the GitHub repository provided by *Tidy Tuesday* (2020) using the *readr* (2018) package. Table \@ref(tab:data-dic) describes each variable included in the dataset.
@@ -427,9 +425,9 @@ interactive(
 
 No clear relationship can be identified between the time to crack and the strength of the passwords, leading us to believe that the basis for defining the strength of a password is not the time to crack.
 
-Another intersting pattern observed through figure \@ref(fig:time) are the horizontal and vertical lines formed by the data points, which leads us to question the accuracy of the dataset.
+Another interesting pattern observed through figure \@ref(fig:time) are the horizontal and vertical lines formed by the data points, which leads us to question the accuracy of the dataset.
 
-## Is there a relationship among the online and offline password crack times ?
+## Is there a relationship among the online and offline password crack times?
 
 Since the time to crack a password offline was used throughout the above analysis, it would be interesting to analyse the relationship between the online and offline times spent on cracking passwords.
 
@@ -486,13 +484,13 @@ strong %>%
 Passwords belonging to the categories of name, sport and password-related dominate the list of top most passwords with the highest difference of online and offline crack time. It can be assumed that password categories that make more sense to people are much easier to crack offline.
 It's also interesting how the online and offline crack time values across certain passwords are the same, which may lead us to question the accuracy of the dataset used.
 
-## How the type of character and length associated with the strength of password?
+## How does the type of characters and length associate with the strength of a password?
 
 Since the report has discussed the relationship between the strength and popularity of the passwords, as well as the relationship between passwords strength and crack time. Password strength could help to reflect the safety of passwords. However, how the passwords to be defined as strong or weak. This section would focus on the classification mechanism of passwords strength. To identify the relationship between passwords characteristics and passwords strength, as well as the relationship between passwords length and passwords strength.
 
 Firstly, this section would focus on the length and strength of passwords. Figure \@ref(fig:length-strength) shows the distribution of the passwords strength by difference password length. According to Figure \@ref(fig:length-strength), the strength of passwords increases with the length of passwords, except the length of 9 letters. The possible reason might be only one password with a length of 9, while the level of strength is also low. Therefore, this password strength could not be considered representative of the passwords with a length of 9. In general, passwords length of 7 and 8 have the highest median among the group, which is the strength of 8. While, there are some outliers in these two types of length, which are all higher than the strength of 19, and could be considered as very strong passwords. Besides, the median of the strength of passwords with a length of 5 and 6 is the same as 7, and the strength of length in 4 is 6, respectively. However, even though the median strength of length of 5 and 6 is lower than that of the length of 7 and 8, the strength of some passwords with a length of 5 and 6 is still higher than the strength of passwords with a length of 7 and 8. A possible reason might be the character complexity and it would be discussed in the next section. 
 
-By further analysing the relationship between length and strength, Table \@ref(tab:length-strength-summary) has been used for displaying the summary statistics of the length and strength of passwords. It is clear that the average strength increases with the length of passwords. Although the strength of passwords has a slight decrease from the length of 7 to 8, the password length of 8 accounts for the highest strength which is 48. 
+By further analyzing the relationship between length and strength, Table \@ref(tab:length-strength-summary) has been used for displaying the summary statistics of the length and strength of passwords. It is clear that the average strength increases with the length of passwords. Although the strength of passwords has a slight decrease from the length of 7 to 8, the password length of 8 accounts for the highest strength which is 48. 
 
 ```{r password-characteristic}
 # find the characteristic in integer.
@@ -577,12 +575,13 @@ passwords_char %>%
 
 # Conclusion 
 
-Through the exploratory data analysis of the dataset on Top 500 commonly used passwords, it was observed that most people tend to choose passwords that can be easily remembered, therefore a simple password that is related to a name or contains alphanumeric characters and roughly 6-7 characters long is chosen as password. On further exploration it was found that 43.6 % of the commonly used passwords are relatively high in strength and that around 3% of the passwords were of very high strength which varied greatly from typical passwords.  
+Through the exploring the Top 500 commonly used passwords, it was observed that most people tend to choose passwords that can be easily remembered, therefore a simple password that is related to a name or contains alphanumeric characters and roughly 6-7 characters long is chosen as password. On further exploration it was found that 43.6 % of the commonly used passwords are relatively high in strength, and that around 3% of the passwords that varied greatly from typical passwords were of very high strength.
 
-Furthermore ,it was observed that among the password categories, types 'rebellious-rude', 'cool-macho' are considered strong and take relatively more time to get hacked. Another striking discovery made while analyzing the data is that the hacking time and the strength of the passwords in the dataset is not under any strict relationship and that not all passwords with high strength take long to be cracked and also, not all passwords with low strength are cracked easily as there have been instances of high strength password being hacked quicker than a low strength password.   
+In addition, because of the positive relationship between the password length and password strength, as well as the impact of password characteristics on password safety. This report would recommend that users should try to increase the password length to improve password security when setting passwords. Meanwhile, the users could use a more complex password combination, like numbers and characters mixed to increase the strength of passwords. Passwords containing series of numbers would not be recommended because of the low password strength.
 
-Therefore, it can be concluded that most people choose common passwords that can be easily hacked and that using any of the passwords in the dataset is not recommended. 
+Furthermore ,it was observed that among the password categories, types 'rebellious-rude', 'cool-macho' are considered strong and take relatively longer to crack.
+An interesting observation was also made on the strong positive relationship between the online and offline password crack times, while cracking a password offline took significantly less time compared to cracking it offline. This leads us to understand the importance of human insight in cracking passwords rather than a machine randomly trying out all combinations of characters.
 
-In addition, because of the positive relationship between the password length and password strength, as well as the impact of password characteristics on password safety. This report would recommend that users should try to increase the password length to improve password security when signing up accounts. Meanwhile, the users could use a more complex password combination, like numbers and characters mixed to increase the strength of passwords. The pure numbers passwords would not be recommended because of the low password strength. 
+Another striking discovery made while analyzing the data is that the time to crack a password and it's strength are not correlated to each other; not all passwords with high strength take long to crack, while not all passwords with low strength are cracked easily. While using any of the passwords included in this dataset it not recommended, it can be concluded that a different approach has to be adopted in calculating the strength of passwords due to the results contradicting the general opinion that a stronger password would take longer to crack.
 
 # References
